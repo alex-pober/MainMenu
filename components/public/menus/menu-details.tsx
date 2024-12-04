@@ -9,12 +9,11 @@ import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Menu, MenuCategory } from "@/lib/types";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer"
 import { useState } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
@@ -33,62 +32,66 @@ function MenuItemDialog({ item, open, onOpenChange }: MenuItemDialogProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl w-[calc(100%-1.5rem)] mx-auto rounded-xl">
-        <DialogHeader className="px-1 text-left">
-          <DialogTitle className="text-xl text-left">{item.name}</DialogTitle>
-        </DialogHeader>
-        {item.image_urls && item.image_urls.length > 0 && (
-          <div className="space-y-4">
-            <div className="relative mx-0 sm:-mx-6">
-              <div className="aspect-[16/10] overflow-hidden">
-                <img
-                  src={item.image_urls[selectedImageIndex]}
-                  alt={item.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
-            {item.image_urls.length > 1 && (
-              <div className="flex justify-center gap-2 overflow-x-auto pb-2">
-                {item.image_urls.map((imageUrl: string, index: number) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedImageIndex(index)}
-                    className={`relative flex-shrink-0 w-24 h-16 rounded-md overflow-hidden border-2 transition-colors ${
-                      index === selectedImageIndex ? 'border-primary' : 'border-transparent hover:border-primary/50'
-                    }`}
-                  >
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <div className="max-w-2xl w-full mx-auto h-full flex flex-col">
+          <DrawerHeader className="px-4 pt-6 flex-shrink-0">
+            <DrawerTitle className="text-2xl">{item.name}</DrawerTitle>
+          </DrawerHeader>
+          <div className="flex-1 overflow-y-auto px-4 pb-16">
+            {item.image_urls && item.image_urls.length > 0 && (
+              <div className="space-y-6 mb-8">
+                <div className="relative">
+                  <div className="aspect-[16/10] overflow-hidden rounded-lg">
                     <img
-                      src={imageUrl}
-                      alt={`${item.name} - Image ${index + 1}`}
+                      src={item.image_urls[selectedImageIndex]}
+                      alt={item.name}
                       className="w-full h-full object-cover"
                     />
-                  </button>
-                ))}
+                  </div>
+                </div>
+                {item.image_urls.length > 1 && (
+                  <div className="flex justify-center gap-3 overflow-x-auto pb-2">
+                    {item.image_urls.map((imageUrl: string, index: number) => (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedImageIndex(index)}
+                        className={`relative flex-shrink-0 w-24 h-16 rounded-md overflow-hidden border-2 transition-colors ${
+                          index === selectedImageIndex ? 'border-primary' : 'border-transparent hover:border-primary/50'
+                        }`}
+                      >
+                        <img
+                          src={imageUrl}
+                          alt={`${item.name} - Image ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
-          </div>
-        )}
-        <div className="space-y-4 px-1">
-          {item.description && (
-            <p className="text-muted-foreground text-base leading-relaxed">{item.description}</p>
-          )}
-          {item.dietary_info?.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {item.dietary_info.map((info: string) => (
-                <Badge key={info} variant="outline" className="text-sm">
-                  {info}
-                </Badge>
-              ))}
+            <div className="space-y-6">
+              {item.description && (
+                <p className="text-muted-foreground text-lg leading-relaxed">{item.description}</p>
+              )}
+              {item.dietary_info?.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {item.dietary_info.map((info: string) => (
+                    <Badge key={info} variant="outline" className="text-sm px-3 py-1">
+                      {info}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+              {!item.is_available && (
+                <Badge variant="secondary" className="text-sm px-3 py-1">Currently Unavailable</Badge>
+              )}
             </div>
-          )}
-          {!item.is_available && (
-            <Badge variant="secondary" className="text-sm">Currently Unavailable</Badge>
-          )}
+          </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </DrawerContent>
+    </Drawer>
   )
 }
 
@@ -147,7 +150,7 @@ export function MenuDetails({ menu, categories }: MenuDetailsProps) {
       )}
       <div className="space-y-2">
         {categories.map((category) => (
-          <Collapsible key={category.id} defaultOpen>
+          <Collapsible key={category.id}>
             <div>
               <CollapsibleTrigger className="flex items-center justify-between w-full py-2 group pl-0 pr-2">
                 <div className="space-y-0.5 text-left">
@@ -158,7 +161,7 @@ export function MenuDetails({ menu, categories }: MenuDetailsProps) {
                 </div>
                 <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
               </CollapsibleTrigger>
-              <div className="h-2 bg-gradient-to-b from-transparent to-slate-200/30 -mx-4 sm:-mx-6 md:-mx-8 lg:-mx-12" />
+              <div className="h-px bg-border" />
             </div>
             
             <CollapsibleContent>

@@ -1,7 +1,6 @@
 import { Analytics } from '@vercel/analytics/react';
 import { Inter } from 'next/font/google';
 import { Toaster } from '@/components/ui/toaster';
-import { ThemeProvider } from '@/components/theme-provider';
 import { Navigation } from '@/components/navigation';
 import { Footer } from '@/components/footer';
 import { ErrorBoundary } from '@/components/error-boundary';
@@ -41,18 +40,11 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ErrorBoundary>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <Navigation />
-            <main>{children}</main>
-            <Footer />
-            <Toaster />
-            <StoragePoliciesSetup />
-          </ThemeProvider>
+          <Navigation />
+          <main>{children}</main>
+          <Footer />
+          <Toaster />
+          <StoragePoliciesSetup />
         </ErrorBoundary>
         <Analytics />
       </body>

@@ -24,13 +24,19 @@ interface Menu {
   items: MenuItem[];
 }
 
+interface User {
+  name: string;
+  banner_image_url: string | null;
+}
+
 export default function MenuPage() {
   const [menu, setMenu] = useState<Menu | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const params = useParams();
   const { toast } = useToast();
-  const { client: supabase, error: supabaseError, user } = useSupabase();
-  const menuId = typeof params?.id === 'string' ? params.id : Array.isArray(params?.id) ? params.id[0] : '';
+  const { client: supabase, error: supabaseError } = useSupabase();
+  const userId = typeof params?.id === 'string' ? params.id : Array.isArray(params?.id) ? params.id[0] : '';
 
   useEffect(() => {
     if (supabaseError) {
@@ -46,10 +52,10 @@ export default function MenuPage() {
 
     if (!supabase) {
       console.log('Waiting for Supabase to initialize...');
-      return; // Don't show error, just wait
+      return;
     }
 
-    if (!menuId) {
+    if (!userId) {
       console.error('No user ID provided');
       toast({
         title: 'Error',
@@ -60,9 +66,29 @@ export default function MenuPage() {
       return;
     }
 
-    const fetchMenu = async () => {
+    const fetchData = async () => {
       try {
-        // Get menus for the specific user
+        // First fetch user info
+        const { data: userData, error: userError } = await supabase
+          .from('restaurant_profiles')
+          .select('name, banner_image_url')
+          .eq('user_id', userId)
+          .single();
+
+        if (userError) {
+          console.error('Error fetching user:', userError);
+          toast({
+            title: 'Error',
+            description: 'Failed to load restaurant information',
+            variant: 'destructive',
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        setUser(userData);
+
+        // Then fetch menus
         const { data: userMenus, error: menuError } = await supabase
           .from('menus')
           .select(`
@@ -72,7 +98,7 @@ export default function MenuPage() {
               menu_items (*)
             )
           `)
-          .eq('user_id', menuId)
+          .eq('user_id', userId)
           .order('created_at', { ascending: false });
 
         if (menuError) {
@@ -87,7 +113,7 @@ export default function MenuPage() {
         }
 
         if (!userMenus || userMenus.length === 0) {
-          console.log('No menus found for user:', menuId);
+          console.log('No menus found for user:', userId);
           toast({
             title: 'No Menus Found',
             description: 'No menus found for this user',
@@ -97,14 +123,12 @@ export default function MenuPage() {
           return;
         }
 
-        console.log('User menus:', userMenus);
         setMenu(userMenus[0]); // Set the first menu by default
-        setIsLoading(false);
       } catch (error) {
-        console.error('Error fetching menu:', error);
+        console.error('Error fetching data:', error);
         toast({
           title: "Error",
-          description: error instanceof Error ? error.message : "Failed to load menu",
+          description: error instanceof Error ? error.message : "Failed to load data",
           variant: "destructive",
         });
       } finally {
@@ -112,8 +136,8 @@ export default function MenuPage() {
       }
     };
 
-    fetchMenu();
-  }, [menuId, supabase, toast]);
+    fetchData();
+  }, [userId, supabase, toast]);
 
   if (isLoading) {
     return (
@@ -146,26 +170,33 @@ export default function MenuPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         className="max-w-3xl mx-auto"
       >
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-            {menu.name}
-          </h1>
-          {menu.description && (
-            <p className="mt-4 text-xl text-muted-foreground">
-              {menu.description}
-            </p>
+        <div className="mb-12">
+          {user?.banner_image_url ? (
+            <div className="aspect-[21/9] w-full overflow-hidden">
+              <img 
+                src={user.banner_image_url} 
+                alt={user.name}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ) : (
+            <div className="py-12 px-4 sm:px-6 lg:px-8 text-center">
+              <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+                {user?.name}
+              </h1>
+            </div>
           )}
         </div>
 
-        <div className="space-y-12">
-          <MenuTabs userId={menuId} />
+        <div className="px-4 sm:px-6 lg:px-8 space-y-12">
+          <MenuTabs userId={userId} />
         </div>
       </motion.div>
     </div>
