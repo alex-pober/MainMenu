@@ -126,7 +126,7 @@ export default function DashboardLayout({
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
       <div className={cn(
-        "border-r bg-card transition-all duration-300",
+        "bg-[#f5f5f5] transition-all duration-300",
         collapsed ? "w-[60px]" : "w-[240px]"
       )}>
         <div className="flex flex-col h-full">
@@ -207,14 +207,11 @@ export default function DashboardLayout({
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-14 border-b flex items-center justify-between px-6">
-          <h2 className="font-semibold">
-            {sidebarLinks.find(link => link.href === pathname)?.title || 'Dashboard'}
-          </h2>
-        </header>
-        <main className="flex-1 overflow-auto p-6">
-          {children}
+      <div className="flex-1 flex flex-col overflow-hidden bg-[#f5f5f5]">
+        <main className="flex-1 overflow-auto p-4">
+          <div className="bg-background rounded-lg p-4">
+            {children}
+          </div>
         </main>
       </div>
     </div>
