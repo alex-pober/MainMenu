@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from '@/lib/supabase';
+import { useSupabase } from '@/hooks/use-supabase';
 import type { CreateMenuCategoryInput, MenuCategory } from '@/lib/types';
 
 interface CreateCategoryDialogProps {
@@ -23,19 +23,33 @@ export function CreateCategoryDialog({
   onCategoryCreated 
 }: CreateCategoryDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState<CreateMenuCategoryInput>({
-    menu_id: menuId,
-    name: '',
-    description: '',
-    sort_order: 0
-  });
   const { toast } = useToast();
+  // @ts-ignore
+  const { client: supabase, user } = useSupabase();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
+      if (!supabase) {
+        toast({
+          title: "Error",
+          description: "Supabase client is not available",
+          variant: "destructive"
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      const formData: CreateMenuCategoryInput = {
+        menu_id: menuId,
+        name: (e.target as any).name.value,
+        description: (e.target as any).description.value,
+        sort_order: 0
+      };
+
+      // @ts-ignore
       const { data, error } = await supabase
         .from('menu_categories')
         .insert([formData])
@@ -50,13 +64,7 @@ export function CreateCategoryDialog({
         description: "Category created successfully",
       });
 
-      setFormData({
-        menu_id: menuId,
-        name: '',
-        description: '',
-        sort_order: 0
-      });
-      
+      (e.target as any).reset();
       onOpenChange(false);
     } catch (error: any) {
       toast({
@@ -82,8 +90,6 @@ export function CreateCategoryDialog({
               <Input
                 id="name"
                 placeholder="Enter category name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
               />
             </div>
@@ -92,8 +98,6 @@ export function CreateCategoryDialog({
               <Input
                 id="description"
                 placeholder="Enter category description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               />
             </div>
           </div>

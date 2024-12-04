@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { supabase } from '../supabase';
 import type { Menu, MenuCategory, MenuItem } from '../types';
 

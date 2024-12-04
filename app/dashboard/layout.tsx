@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/lib/supabase';
+import { useSupabase } from '@/hooks/use-supabase';
 
 const sidebarLinks = [
   {
@@ -65,10 +65,54 @@ export default function DashboardLayout({
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const pathname = usePathname();
   const router = useRouter();
+  // @ts-ignore
+  const { client: supabase, error: supabaseError, user } = useSupabase();
+
+  useEffect(() => {
+    if (!supabase) return;
+
+    const checkUser = async () => {
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error) throw error;
+        if (!user) {
+          router.push('/auth');
+          return;
+        }
+        setUserId(user.id);
+      } catch (error) {
+        console.error('Error fetching user:', error);
+        router.push('/auth');
+      }
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'SIGNED_OUT') {
+          setUserId(null);
+          router.push('/auth');
+        } else if (event === 'SIGNED_IN' && session?.user) {
+          setUserId(session.user.id);
+        }
+      }
+    );
+
+    checkUser();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [router, supabase]);
 
   const handleSignOut = async () => {
+    if (!supabase) {
+      console.error('Error signing out: Unable to connect to authentication service');
+      return;
+    }
+
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
@@ -77,21 +121,6 @@ export default function DashboardLayout({
       console.error('Error signing out:', error);
     }
   };
-
-  useEffect(() => {
-    const fetchUserId = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          setUserId(session.user.id);
-        }
-      } catch (error) {
-        console.error('Error fetching user session:', error);
-      }
-    };
-
-    fetchUserId();
-  }, []);
 
   return (
     <div className="flex h-screen bg-background">

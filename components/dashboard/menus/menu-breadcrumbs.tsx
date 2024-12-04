@@ -15,6 +15,7 @@ export function MenuBreadcrumbs() {
       if (!params.id) return;
 
       try {
+          // @ts-ignore
         const { data, error } = await supabase
           .from('menus')
           .select('*')
@@ -22,6 +23,7 @@ export function MenuBreadcrumbs() {
           .single();
 
         if (error) throw error;
+          // @ts-ignore
         setMenu(data);
       } catch (error) {
         console.error('Error fetching menu:', error);

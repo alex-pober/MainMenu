@@ -4,6 +4,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Navigation } from '@/components/navigation';
 import { Footer } from '@/components/footer';
+import { ErrorBoundary } from '@/components/error-boundary';
 import { StoragePoliciesSetup } from '@/components/storage-policies-setup';
 import './globals.css';
 
@@ -39,18 +40,20 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Navigation />
-          <main>{children}</main>
-          <Footer />
-          <Toaster />
-          <StoragePoliciesSetup />
-        </ThemeProvider>
+        <ErrorBoundary>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Navigation />
+            <main>{children}</main>
+            <Footer />
+            <Toaster />
+            <StoragePoliciesSetup />
+          </ThemeProvider>
+        </ErrorBoundary>
         <Analytics />
       </body>
     </html>

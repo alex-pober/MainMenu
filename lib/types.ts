@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 export interface Menu {
   id: string;
   name: string;

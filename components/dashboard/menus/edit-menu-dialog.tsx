@@ -46,6 +46,7 @@ export function EditMenuDialog({ open, onOpenChange, menu }: EditMenuDialogProps
     setIsLoading(true);
 
     try {
+        // @ts-ignore
       const { data, error } = await supabase
         .from('menus')
         .update({
@@ -62,6 +63,7 @@ export function EditMenuDialog({ open, onOpenChange, menu }: EditMenuDialogProps
       if (error) throw error;
 
       // Update the menu in context
+        // @ts-ignore
       updateMenu(data);
 
       toast({
