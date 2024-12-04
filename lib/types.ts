@@ -2,15 +2,16 @@
 
 export interface Menu {
   id: string;
+  user_id: string;
   name: string;
   description: string;
   status: 'active' | 'draft' | 'scheduled';
+  display_order: number;
+  created_at: string;
+  updated_at: string;
   is_always_available: boolean;
   available_start_time?: string;
   available_end_time?: string;
-  created_at: string;
-  updated_at: string;
-  user_id: string;
 }
 
 export interface MenuCategory {

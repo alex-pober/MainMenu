@@ -33,7 +33,7 @@ export function MenuTabs({ userId }: MenuTabsProps) {
           `)
           .eq('user_id', userId)
           .eq('status', 'active')
-          .order('created_at', { ascending: false });
+          .order('display_order', { ascending: true });
 
         if (menuError) throw menuError;
 
@@ -41,10 +41,13 @@ export function MenuTabs({ userId }: MenuTabsProps) {
           setMenus(menuData);
           setActiveMenu(menuData[0].id);
 
-          // Organize categories by menu_id
+          // Organize categories by menu_id and sort them by sort_order
           const categoriesByMenu: Record<string, MenuCategory[]> = {};
           menuData.forEach(menu => {
-            categoriesByMenu[menu.id] = menu.menu_categories || [];
+            const sortedCategories = (menu.menu_categories || []).sort(
+              (a, b) => a.sort_order - b.sort_order
+            );
+            categoriesByMenu[menu.id] = sortedCategories;
           });
           setCategories(categoriesByMenu);
         }
@@ -67,16 +70,16 @@ export function MenuTabs({ userId }: MenuTabsProps) {
     );
   }
 
-  if (!menus.length) {
+  if (menus.length === 0) {
     return (
       <div className="text-center py-8">
-        <p className="text-muted-foreground">No menus available at the moment.</p>
+        <p className="text-muted-foreground">No active menus found.</p>
       </div>
     );
   }
 
   return (
-    <Tabs value={activeMenu || undefined} onValueChange={setActiveMenu} className="w-full">
+    <Tabs value={activeMenu || undefined} onValueChange={setActiveMenu}>
       <div className="flex justify-center">
         <ScrollArea className="w-auto">
           <TabsList className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1">
@@ -96,10 +99,7 @@ export function MenuTabs({ userId }: MenuTabsProps) {
 
       {menus.map((menu) => (
         <TabsContent key={menu.id} value={menu.id} className="mt-6">
-          <MenuDetails 
-            menu={menu} 
-            categories={categories[menu.id] || []} 
-          />
+          <MenuDetails menu={menu} categories={categories[menu.id] || []} />
         </TabsContent>
       ))}
     </Tabs>
