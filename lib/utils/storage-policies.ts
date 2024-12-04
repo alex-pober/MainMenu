@@ -1,6 +1,12 @@
 import { supabase } from '@/lib/supabase';
 
 export async function setupStoragePolicies() {
+  // Skip setup if environment variables are not available (e.g., during build)
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    console.log('Skipping storage policies setup: Missing environment variables');
+    return;
+  }
+
   try {
     // First check if bucket exists
     const { data: buckets, error: bucketsError } = await supabase
@@ -29,13 +35,15 @@ export async function setupStoragePolicies() {
         .createBucket('menu-item-pictures', {
           public: true,
           allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif'],
-          fileSizeLimit: 5242880 // 5MB
+          fileSizeLimit: 5242880, // 5MB
         });
 
       if (createError) {
         console.error('Error creating bucket:', createError);
         return;
       }
+
+      console.log('Successfully created menu-item-pictures bucket');
     }
 
     // Verify bucket access
@@ -51,6 +59,6 @@ export async function setupStoragePolicies() {
 
     console.log('Storage bucket setup completed successfully');
   } catch (error) {
-    console.error('Error setting up storage:', error);
+    console.error('Error in setupStoragePolicies:', error);
   }
 }

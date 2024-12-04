@@ -4,13 +4,12 @@ import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Navigation } from '@/components/navigation';
 import { Footer } from '@/components/footer';
-import { setupStoragePolicies } from '@/lib/utils/storage-policies';
+import { StoragePoliciesSetup } from '@/components/storage-policies-setup';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
-// Set up storage policies
-setupStoragePolicies();
+export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: 'MainMenu.io - Digital Menu Solutions for Modern Restaurants',
@@ -40,11 +39,17 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="light">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
           <Navigation />
           <main>{children}</main>
           <Footer />
           <Toaster />
+          <StoragePoliciesSetup />
         </ThemeProvider>
         <Analytics />
       </body>
