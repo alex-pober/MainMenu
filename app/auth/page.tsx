@@ -11,6 +11,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 
+export const dynamic = "force-dynamic";
+
 export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
