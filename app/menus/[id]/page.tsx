@@ -13,9 +13,9 @@ interface MenuPageProps {
 export async function generateMetadata(
   { params }: MenuPageProps
 ): Promise<Metadata> {
-  const cookieStore = await cookies();
+  const cookieStore = cookies();
   const { id } = await params;
-  const supabase = createServerComponentClient({ cookies: () => cookieStore });
+  const supabase = createServerComponentClient({ cookies });
   
   const { data: menus } = await supabase
     .from('menus')
@@ -39,9 +39,9 @@ export async function generateMetadata(
 }
 
 export default async function MenuPage({ params }: MenuPageProps) {
-  const cookieStore = await cookies();
+  const cookieStore = cookies();
   const { id } = await params;
-  const supabase = createServerComponentClient({ cookies: () => cookieStore });
+  const supabase = createServerComponentClient({ cookies });
   
   const { data: menus } = await supabase
     .from('menus')

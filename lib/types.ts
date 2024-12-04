@@ -19,6 +19,7 @@ export interface MenuCategory {
   sort_order: number;
   created_at: string;
   updated_at: string;
+  menu_items?: MenuItem[];
 }
 
 export interface MenuItem {

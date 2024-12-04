@@ -226,7 +226,7 @@ export function RestaurantForm() {
                 <FormLabel>Banner Image</FormLabel>
                 <FormControl>
                   <ImageUpload
-                    value={field.value || undefined}
+                    value={field.value || null}
                     onChange={field.onChange}
                     imageType="banner"
                   />
@@ -244,7 +244,7 @@ export function RestaurantForm() {
                 <FormLabel>Logo</FormLabel>
                 <FormControl>
                   <ImageUpload
-                    value={field.value || undefined}
+                    value={field.value || null}
                     onChange={field.onChange}
                     imageType="logo"
                   />

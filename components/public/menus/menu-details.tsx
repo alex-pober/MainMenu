@@ -50,7 +50,7 @@ function MenuItemDialog({ item, open, onOpenChange }: MenuItemDialogProps) {
             </div>
             {item.image_urls.length > 1 && (
               <div className="flex justify-center gap-2 overflow-x-auto pb-2">
-                {item.image_urls.map((imageUrl, index) => (
+                {item.image_urls.map((imageUrl: string, index: number) => (
                   <button
                     key={index}
                     onClick={() => setSelectedImageIndex(index)}
@@ -75,7 +75,7 @@ function MenuItemDialog({ item, open, onOpenChange }: MenuItemDialogProps) {
           )}
           {item.dietary_info?.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
-              {item.dietary_info.map((info) => (
+              {item.dietary_info.map((info: string) => (
                 <Badge key={info} variant="outline" className="text-sm">
                   {info}
                 </Badge>
@@ -183,7 +183,7 @@ export function MenuDetails({ menu, categories }: MenuDetailsProps) {
                               {!item.is_available && (
                                 <Badge variant="secondary" className="text-xs">Unavailable</Badge>
                               )}
-                              {item.dietary_info?.map((info) => (
+                              {item.dietary_info?.map((info: string) => (
                                 <Badge key={info} variant="outline" className="text-xs">
                                   {info}
                                 </Badge>

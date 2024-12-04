@@ -22,7 +22,7 @@ export function MenuItems({ categories }: MenuItemsProps) {
             <p className="text-muted-foreground mb-4">{category.description}</p>
           )}
           <div className="space-y-4">
-            {category.menu_items.map((item) => (
+            {category.menu_items?.map((item) => (
               <div
                 key={item.id}
                 data-menu-item
@@ -30,13 +30,13 @@ export function MenuItems({ categories }: MenuItemsProps) {
                 data-item-description={item.description}
                 className="flex items-start gap-4 p-4 rounded-lg border bg-card"
               >
-                {item.image_url && (
+                {item.image_urls?.[0] && (
                   <div 
                     className="relative flex-shrink-0 w-20 h-20 cursor-pointer"
-                    onClick={() => setSelectedImage(item.image_url)}
+                    onClick={() => setSelectedImage(item.image_urls[0])}
                   >
                     <Image
-                      src={item.image_url}
+                      src={item.image_urls[0]}
                       alt={item.name}
                       fill
                       className="object-cover rounded-md"
@@ -85,8 +85,8 @@ export function MenuItems({ categories }: MenuItemsProps) {
         </section>
       ))}
       <ImagePreviewDialog
-        isOpen={!!selectedImage}
-        onClose={() => setSelectedImage(null)}
+        open={!!selectedImage}
+        onOpenChange={(open) => !open && setSelectedImage(null)}
         imageUrl={selectedImage || ''}
       />
     </div>

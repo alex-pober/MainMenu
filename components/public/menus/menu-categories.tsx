@@ -6,10 +6,11 @@ import { cn } from '@/lib/utils';
 import type { MenuCategory } from '@/lib/types';
 
 interface MenuCategoriesProps {
+  menuId: string;
   categories: MenuCategory[];
 }
 
-export function MenuCategories({ categories }: MenuCategoriesProps) {
+export function MenuCategories({ categories, menuId }: MenuCategoriesProps) {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   useEffect(() => {
