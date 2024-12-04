@@ -29,25 +29,79 @@ export default function MenuPage() {
   const [isLoading, setIsLoading] = useState(true);
   const params = useParams();
   const { toast } = useToast();
-  // @ts-ignore
-  const { client: supabase, error: supabaseError } = useSupabase();
+  const { client: supabase, error: supabaseError, user } = useSupabase();
   const menuId = typeof params?.id === 'string' ? params.id : Array.isArray(params?.id) ? params.id[0] : '';
 
   useEffect(() => {
-    if (!supabase || !menuId) return;
+    if (supabaseError) {
+      console.error('Supabase initialization error:', supabaseError);
+      toast({
+        title: 'Error',
+        description: 'Failed to initialize database connection',
+        variant: 'destructive',
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    if (!supabase) {
+      console.log('Waiting for Supabase to initialize...');
+      return; // Don't show error, just wait
+    }
+
+    if (!menuId) {
+      console.error('No user ID provided');
+      toast({
+        title: 'Error',
+        description: 'No user ID provided',
+        variant: 'destructive',
+      });
+      setIsLoading(false);
+      return;
+    }
 
     const fetchMenu = async () => {
       try {
-        const { data, error } = await supabase
+        // Get menus for the specific user
+        const { data: userMenus, error: menuError } = await supabase
           .from('menus')
-          .select('*, items(*)')
-          .eq('id', menuId)
-          .single();
+          .select(`
+            *,
+            menu_categories (
+              *,
+              menu_items (*)
+            )
+          `)
+          .eq('user_id', menuId)
+          .order('created_at', { ascending: false });
 
-        if (error) throw error;
+        if (menuError) {
+          console.error('Error fetching user menus:', menuError);
+          toast({
+            title: 'Error',
+            description: 'Failed to load menus',
+            variant: 'destructive',
+          });
+          setIsLoading(false);
+          return;
+        }
 
-        setMenu(data);
+        if (!userMenus || userMenus.length === 0) {
+          console.log('No menus found for user:', menuId);
+          toast({
+            title: 'No Menus Found',
+            description: 'No menus found for this user',
+            variant: 'destructive',
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        console.log('User menus:', userMenus);
+        setMenu(userMenus[0]); // Set the first menu by default
+        setIsLoading(false);
       } catch (error) {
+        console.error('Error fetching menu:', error);
         toast({
           title: "Error",
           description: error instanceof Error ? error.message : "Failed to load menu",
