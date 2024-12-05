@@ -14,7 +14,8 @@ import {
   ChevronRight,
   ExternalLink,
   LogOut,
-  Info
+  Info,
+  X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -66,6 +67,7 @@ export default function DashboardLayout({
   const [collapsed, setCollapsed] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   // @ts-ignore
@@ -124,29 +126,60 @@ export default function DashboardLayout({
 
   return (
     <div className="flex h-screen bg-background">
+      {/* Mobile Menu Button */}
+      <button
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-md bg-background shadow-sm"
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+      >
+        <Menu className="h-5 w-5" />
+      </button>
+
+      {/* Overlay for mobile */}
+      {isMobileMenuOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black/20 z-40"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <div className={cn(
-        "bg-[#f5f5f5] transition-all duration-300",
-        collapsed ? "w-[60px]" : "w-[240px]"
+        "bg-[#f5f5f5] transition-all duration-300 fixed lg:relative z-50",
+        "h-full lg:h-screen",
+        collapsed ? "w-[60px]" : "w-[240px]",
+        // Mobile styles
+        "lg:translate-x-0",
+        isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="flex flex-col h-full">
-          <div className="h-14 border-b flex items-center justify-between px-3">
+          <div className="h-14 flex items-center justify-between px-3">
             <span className={cn(
               "font-semibold transition-all duration-300",
               collapsed ? "opacity-0 w-0" : "opacity-100"
             )}>
               MainMenu
             </span>
+            {/* Hide collapse button on mobile */}
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setCollapsed(!collapsed)}
+              className="hidden lg:flex"
             >
               {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
             </Button>
+            {/* Show close button on mobile */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="lg:hidden"
+            >
+              <X size={20} />
+            </Button>
           </div>
 
-          {/* View Public Menu Button at Top */}
+          {/* View Public Menu Button */}
           <div className="p-2">
             <Button
               variant="default"
@@ -169,6 +202,7 @@ export default function DashboardLayout({
               <Link
                 key={link.href}
                 href={link.href}
+                onClick={() => setIsMobileMenuOpen(false)} // Close mobile menu when clicking a link
                 className={cn(
                   "flex items-center gap-2 px-3 py-2 rounded-md transition-colors",
                   (pathname === link.href || (link.href !== '/dashboard' && pathname.startsWith(link.href)))
@@ -207,8 +241,8 @@ export default function DashboardLayout({
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-[#f5f5f5]">
-        <main className="flex-1 overflow-auto p-4">
+      <div className="flex-1 flex flex-col overflow-hidden bg-[#f5f5f5] w-full">
+        <main className="flex-1 overflow-auto p-4 pt-16 lg:pt-4"> {/* Added padding-top for mobile menu button */}
           <div className="bg-background rounded-lg p-4">
             {children}
           </div>
