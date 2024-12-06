@@ -119,12 +119,12 @@ export default function DashboardLayout({
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-50 flex flex-col bg-background border-r transition-all duration-300",
+        "fixed inset-y-0 left-0 z-50 flex flex-col bg-[#f5f5f5] transition-all duration-300",
         collapsed ? "w-[60px]" : "w-[240px]",
         isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
         {/* Sidebar Header */}
-        <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center justify-between p-4">
           <h1 className={cn(
             "font-bold transition-all duration-300",
             collapsed ? "opacity-0 w-0" : "opacity-100"
@@ -176,7 +176,7 @@ export default function DashboardLayout({
               className={cn(
                 "flex items-center gap-2 px-3 py-2 rounded-md transition-colors",
                 (pathname === link.href || (link.href !== '/dashboard' && pathname.startsWith(link.href)))
-                  ? "bg-secondary text-secondary-foreground hover:bg-secondary/90"
+                  ? "bg-white shadow-sm text-secondary-foreground hover:bg-white/90"
                   : "hover:bg-secondary/50 hover:text-secondary-foreground text-muted-foreground"
               )}
             >

@@ -360,10 +360,20 @@ export function MenuDetails({ menu, categories, activeFilters }: MenuDetailsProp
                         {item.description}
                       </p>
                     )}
-                    {(item.is_spicy || item.is_new || item.is_limited_time || item.is_most_popular || item.is_special || !item.is_available) && (
+                    {(item.is_spicy || item.is_new || item.is_limited_time || item.is_most_popular || item.is_special || item.is_vegan || item.is_vegetarian || !item.is_available) && (
                       <div className="flex flex-wrap gap-1.5">
                         {!item.is_available && (
                           <Badge variant="secondary">Unavailable</Badge>
+                        )}
+                        {item.is_vegan && (
+                          <Badge variant="outline" className="text-xs bg-emerald-100 text-emerald-800 border-emerald-200">
+                            🌱 Vegan
+                          </Badge>
+                        )}
+                        {item.is_vegetarian && (
+                          <Badge variant="outline" className="text-xs bg-lime-100 text-lime-800 border-lime-200">
+                            🥚 Vegetarian
+                          </Badge>
                         )}
                         {item.is_spicy && (
                           <Badge variant="outline" className="text-xs bg-red-100 text-red-800 border-red-200">

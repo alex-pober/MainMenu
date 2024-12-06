@@ -55,6 +55,7 @@ const LABEL_CONFIG = {
 
 export function ItemFilter({ onFilterChange, availableLabels }: ItemFilterProps) {
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [hasScrolled, setHasScrolled] = useState(false);
 
   const handleFilterToggle = (filter: string) => {
     const updated = activeFilters.includes(filter)
@@ -66,9 +67,19 @@ export function ItemFilter({ onFilterChange, availableLabels }: ItemFilterProps)
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto mb-0">
-      <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-        <div className="flex gap-1.5">
+    <div className="w-full max-w-3xl mx-auto mb-0 relative">
+      {/* Gradient overlay to indicate scrollability */}
+      <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white to-transparent pointer-events-none" />
+      
+      {/* Scroll container with subtle animation */}
+      <div 
+        className={cn(
+          "overflow-x-auto [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent",
+          !hasScrolled && "animate-[scroll-hint_1.5s_ease-in-out_0.5s]"
+        )}
+        onScroll={() => setHasScrolled(true)}
+      >
+        <div className="flex gap-1.5 pb-2">
           {availableLabels.map(label => {
             const config = LABEL_CONFIG[label as keyof typeof LABEL_CONFIG];
             if (!config) return null;
