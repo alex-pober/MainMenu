@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { MoreHorizontal, Clock, Pencil, Trash, Power, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { supabase } from '@/lib/supabase';
+import { useSupabase } from '@/hooks/use-supabase';
 import { useMenus } from '@/lib/context/menu-context';
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from "@/hooks/use-toast";
@@ -26,9 +26,11 @@ export function MenuList({ searchQuery }: MenuListProps) {
   const { toast } = useToast();
   const [selectedMenu, setSelectedMenu] = useState<Menu | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const { client: supabase, user, isLoading: isSessionLoading } = useSupabase();
 
   const handleDragEnd = async (result: any) => {
-    if (!result.destination) return;
+    if (!result.destination || !supabase || !user) return;
 
     console.log('Drag end result:', {
       source: result.source,
@@ -46,55 +48,32 @@ export function MenuList({ searchQuery }: MenuListProps) {
       display_order: index,
     }));
 
-    console.log('Updated items with new order:', updatedItems.map(item => ({
-      id: item.id,
-      name: item.name,
-      display_order: item.display_order
-    })));
-
     setMenus(updatedItems);
 
-    // Update the database
     try {
-      // Update each menu's display_order one at a time
-      for (const menu of updatedItems) {
+      // Update each menu's display_order in the database
+      for (const item of updatedItems) {
         const { error } = await supabase
           .from('menus')
-          .update({ display_order: menu.display_order })
-          .eq('id', menu.id);
-
-        if (error) {
-          console.error('Supabase error details for menu', menu.id, ':', {
-            code: error.code,
-            message: error.message,
-            details: error.details,
-            hint: error.hint
-          });
-          throw error;
-        }
+          .update({ display_order: item.display_order })
+          .eq('id', item.id)
+          .eq('user_id', user.id);
+        
+        if (error) throw error;
       }
-
-      console.log('Database update successful');
-      toast({
-        title: "Success",
-        description: "Menu order updated successfully",
-      });
-    } catch (error: any) {
-      console.error('Error updating menu order:', {
-        error: error,
-        message: error.message,
-        details: error?.details,
-        hint: error?.hint
-      });
+    } catch (error) {
+      console.error('Error updating menu order:', error);
       toast({
         title: "Error",
-        description: `Failed to update menu order: ${error.message || 'Unknown error'}`,
+        description: "Failed to update menu order",
         variant: "destructive",
       });
     }
   };
 
   const handleToggleStatus = async (menuId: string, currentStatus: string) => {
+    if (!supabase || !user) return;
+
     try {
       // Modify the status logic to match the allowed types
       const newStatus = currentStatus === 'active' ? 'draft' : 'active';
@@ -102,6 +81,7 @@ export function MenuList({ searchQuery }: MenuListProps) {
         .from('menus')
         .update({ status: newStatus })
         .eq('id', menuId)
+        .eq('user_id', user.id)
         .select()
         .single();
 
@@ -126,11 +106,14 @@ export function MenuList({ searchQuery }: MenuListProps) {
   };
 
   const handleDeleteMenu = async (menuId: string) => {
+    if (!supabase || !user) return;
+
     try {
       const { error } = await supabase
         .from('menus')
         .delete()
-        .eq('id', menuId);
+        .eq('id', menuId)
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
@@ -152,15 +135,25 @@ export function MenuList({ searchQuery }: MenuListProps) {
 
   useEffect(() => {
     const fetchMenus = async () => {
-      try {
-        // Get the current user's session
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (!session) {
-          console.error('No session found');
-          return;
-        }
+      // Wait for session loading to complete
+      if (isSessionLoading) {
+        return;
+      }
 
+      // Check if we have the required client and user
+      if (!supabase || !user) {
+        console.error('No session found');
+        toast({
+          title: "Authentication Error",
+          description: "Please sign in to view your menus",
+          variant: "destructive",
+        });
+        router.push('/auth');
+        return;
+      }
+
+      try {
+        setIsLoading(true);
         const { data, error } = await supabase
           .from('menus')
           .select(`
@@ -183,18 +176,47 @@ export function MenuList({ searchQuery }: MenuListProps) {
               )
             )
           `)
-          .eq('user_id', session.user.id)
+          .eq('user_id', user.id)
           .order('display_order', { ascending: true });
 
         if (error) throw error;
         setMenus(data || []);
       } catch (error) {
         console.error('Error fetching menus:', error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch menus",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchMenus();
-  }, [setMenus]);
+  }, [supabase, user, setMenus, toast, router, isSessionLoading]);
+
+  if (isSessionLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="flex items-center space-x-2">
+          <Clock className="h-4 w-4 animate-spin" />
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="flex items-center space-x-2">
+          <Clock className="h-4 w-4 animate-spin" />
+          <p>Loading menus...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>

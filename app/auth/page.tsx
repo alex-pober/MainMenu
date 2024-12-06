@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
@@ -21,6 +21,13 @@ export default function AuthPage() {
   const router = useRouter();
   const { toast } = useToast();
   const { client: supabase, user, error: supabaseError } = useSupabase();
+
+  useEffect(() => {
+    if (user) {
+      console.log('User already authenticated, redirecting to dashboard');
+      router.push('/dashboard');
+    }
+  }, [user, router]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,6 +51,7 @@ export default function AuthPage() {
 
         if (error) throw error;
 
+        console.log('Login successful, redirecting to dashboard');
         router.push('/dashboard');
       } else {
         const { error } = await supabase.auth.signUp({
@@ -53,10 +61,8 @@ export default function AuthPage() {
 
         if (error) throw error;
 
-        toast({
-          title: "Success",
-          description: "Please check your email to verify your account",
-        });
+        console.log('Signup successful, redirecting to dashboard');
+        router.replace('/dashboard');
       }
     } catch (error: any) {
       console.error('Authentication error:', error);
