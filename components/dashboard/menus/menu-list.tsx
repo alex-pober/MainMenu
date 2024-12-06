@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MoreHorizontal, Clock, Pencil, Trash, Power, GripVertical } from "lucide-react";
+import { MoreHorizontal, Clock, Pencil, Trash, Power, GripVertical, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useSupabase } from '@/hooks/use-supabase';
@@ -13,6 +13,7 @@ import { useMenus } from '@/lib/context/menu-context';
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from "@/hooks/use-toast";
 import { EditMenuDialog } from './edit-menu-dialog';
+import { CreateMenuDialog } from './create-menu-dialog';
 import { Menu } from '@/lib/types';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
@@ -26,6 +27,7 @@ export function MenuList({ searchQuery }: MenuListProps) {
   const { toast } = useToast();
   const [selectedMenu, setSelectedMenu] = useState<Menu | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { client: supabase, user, isLoading: isSessionLoading } = useSupabase();
 
@@ -240,7 +242,23 @@ export function MenuList({ searchQuery }: MenuListProps) {
       <Droppable droppableId="menus">
         {(provided) => (
           <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-4">
-            {menus
+            {menus.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                  <div className="rounded-full bg-muted p-4 mb-4">
+                    <Plus className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2">No menus created yet</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Get started by creating your first menu. You can add categories, items, and customize your menu layout.
+                  </p>
+                  <Button onClick={() => setIsCreateDialogOpen(true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Your First Menu
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : menus
               .filter((menu) =>
                 menu.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 menu.description.toLowerCase().includes(searchQuery.toLowerCase())
@@ -343,6 +361,10 @@ export function MenuList({ searchQuery }: MenuListProps) {
           menu={selectedMenu}
         />
       )}
+      <CreateMenuDialog 
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
+      />
     </DragDropContext>
   );
 }
