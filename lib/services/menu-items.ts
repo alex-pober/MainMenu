@@ -1,7 +1,25 @@
 // @ts-nocheck
-import { supabase } from '@/lib/supabase';
+import { createBrowserClient } from '@supabase/ssr';
 import { MenuItem } from '@/lib/types';
 import { uploadImages, deleteImage } from '@/lib/utils/upload';
+
+const getSupabaseClient = () => {
+  const client = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+  
+  // Log authentication state
+  client.auth.getSession().then(({ data: { session }}) => {
+    if (session?.user) {
+      console.log('[MenuItems Service] Authenticated user:', session.user.id);
+    } else {
+      console.warn('[MenuItems Service] No authenticated user found');
+    }
+  });
+  
+  return client;
+};
 
 export async function updateMenuItem(
   itemId: string,
@@ -9,30 +27,37 @@ export async function updateMenuItem(
   newImageFiles: string[],
   existingImageUrls: string[]
 ): Promise<MenuItem> {
-  try {
-    console.log('Starting item update with:', {
-      itemId,
-      updates,
-      newImageCount: newImageFiles.length,
-      existingImageCount: existingImageUrls.length
-    });
+  console.log('[MenuItems Service] Starting updateMenuItem:', {
+    itemId,
+    updateFields: Object.keys(updates),
+    newImagesCount: newImageFiles.length,
+    existingImagesCount: existingImageUrls.length
+  });
 
+  const supabase = getSupabaseClient();
+  try {
     // Handle image changes
     const imagesToDelete = existingImageUrls.filter(url => !newImageFiles.includes(url));
     const newImages = newImageFiles.filter(file => !existingImageUrls.includes(file));
     
-    console.log('Processing image updates:', {
-      toDelete: imagesToDelete.length,
-      toUpload: newImages.length
+    console.log('[MenuItems Service] Image changes:', {
+      toDelete: imagesToDelete,
+      toUpload: newImages.length,
+      finalImageCount: existingImageUrls.length - imagesToDelete.length + newImages.length
     });
 
     // Delete removed images
     if (imagesToDelete.length > 0) {
       try {
+        console.log('[MenuItems Service] Deleting old images:', imagesToDelete);
         await Promise.all(imagesToDelete.map(url => deleteImage(url)));
-        console.log('Successfully deleted old images:', imagesToDelete);
+        console.log('[MenuItems Service] Successfully deleted old images');
       } catch (error) {
-        console.error('Failed to delete old images:', error);
+        console.error('[MenuItems Service] Failed to delete images:', {
+          error,
+          images: imagesToDelete,
+          errorMessage: error.message
+        });
         throw new Error('Failed to delete old images');
       }
     }
@@ -41,10 +66,15 @@ export async function updateMenuItem(
     let uploadedUrls: string[] = [];
     if (newImages.length > 0) {
       try {
+        console.log('[MenuItems Service] Uploading new images...');
         uploadedUrls = await uploadImages(newImages);
-        console.log('Successfully uploaded new images:', uploadedUrls);
+        console.log('[MenuItems Service] Successfully uploaded new images:', uploadedUrls);
       } catch (error) {
-        console.error('Failed to upload new images:', error);
+        console.error('[MenuItems Service] Failed to upload images:', {
+          error,
+          images: newImages,
+          errorMessage: error.message
+        });
         throw new Error('Failed to upload new images');
       }
     }
@@ -55,7 +85,11 @@ export async function updateMenuItem(
       ...uploadedUrls
     ];
 
-    console.log('Updating database with final image URLs:', finalImageUrls);
+    console.log('[MenuItems Service] Updating database with:', {
+      itemId,
+      imageCount: finalImageUrls.length,
+      updateFields: { ...updates, image_urls: finalImageUrls }
+    });
 
     // Update the menu item in the database
     const { data, error } = await supabase
@@ -70,26 +104,43 @@ export async function updateMenuItem(
       .single();
 
     if (error) {
-      console.error('Database update error:', error);
+      console.error('[MenuItems Service] Database update failed:', {
+        error,
+        errorMessage: error.message,
+        details: error.details
+      });
       throw error;
     }
 
     if (!data) {
+      console.error('[MenuItems Service] No data returned from update');
       throw new Error('No data returned from database update');
     }
 
-    console.log('Successfully updated menu item:', data);
+    console.log('[MenuItems Service] Successfully updated menu item:', {
+      id: data.id,
+      name: data.name,
+      imageCount: data.image_urls?.length || 0
+    });
+    
     return {
       ...data,
       image_urls: data.image_urls || []
     };
   } catch (error) {
-    console.error('Error in updateMenuItem:', error);
+    console.error('[MenuItems Service] Error in updateMenuItem:', {
+      error,
+      errorMessage: error.message,
+      stack: error.stack
+    });
     throw error;
   }
 }
 
 export async function getMenuItem(itemId: string): Promise<MenuItem> {
+  console.log('[MenuItems Service] Fetching menu item:', itemId);
+  const supabase = getSupabaseClient();
+  
   const { data, error } = await supabase
     .from('menu_items')
     .select('*')
@@ -97,13 +148,19 @@ export async function getMenuItem(itemId: string): Promise<MenuItem> {
     .single();
 
   if (error) {
-    console.error('Error fetching menu item:', error);
+    console.error('[MenuItems Service] Failed to fetch menu item:', {
+      error,
+      errorMessage: error.message,
+      itemId
+    });
     throw error;
   }
 
-  if (!data) {
-    throw new Error('Menu item not found');
-  }
+  console.log('[MenuItems Service] Successfully fetched menu item:', {
+    id: data.id,
+    name: data.name,
+    imageCount: data.image_urls?.length || 0
+  });
 
   return {
     ...data,

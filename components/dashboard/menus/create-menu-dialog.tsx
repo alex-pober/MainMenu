@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from '@/lib/supabase';
+import { createBrowserClient } from '@supabase/ssr';
 import { useMenus } from '@/lib/context/menu-context';
 import type { CreateMenuInput } from '@/lib/types';
 
@@ -35,6 +35,11 @@ export function CreateMenuDialog({ open, onOpenChange }: CreateMenuDialogProps) 
     setIsLoading(true);
 
     try {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+
       const {
         data: { user },
         error: userError

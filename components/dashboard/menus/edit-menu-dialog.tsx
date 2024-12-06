@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from '@/lib/supabase';
+import { createBrowserClient } from '@supabase/ssr';
 import { useMenus } from '@/lib/context/menu-context';
 import type { Menu } from '@/lib/types';
 
@@ -46,7 +46,10 @@ export function EditMenuDialog({ open, onOpenChange, menu }: EditMenuDialogProps
     setIsLoading(true);
 
     try {
-        // @ts-ignore
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
       const { data, error } = await supabase
         .from('menus')
         .update({
@@ -62,8 +65,6 @@ export function EditMenuDialog({ open, onOpenChange, menu }: EditMenuDialogProps
 
       if (error) throw error;
 
-      // Update the menu in context
-        // @ts-ignore
       updateMenu(data);
 
       toast({

@@ -7,7 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MenuCategories } from './menu-categories';
-import { supabase } from '@/lib/supabase';
+import { createBrowserClient } from '@supabase/ssr';
 import type { Menu, MenuCategory } from '@/lib/types';
 
 interface MenuCardProps {
@@ -26,6 +26,10 @@ export function MenuCard({ menu, isExpanded, onToggle }: MenuCardProps) {
 
       try {
         setIsLoading(true);
+        const supabase = createBrowserClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        );
         const { data, error } = await supabase
           .from('menu_categories')
           .select('*')

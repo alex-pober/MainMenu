@@ -6,7 +6,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Menu, X, LogOut } from 'lucide-react';
 import { Button } from './ui/button';
-import { supabase } from '@/lib/supabase';
+import { createBrowserClient } from '@supabase/ssr';
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -16,12 +16,20 @@ export function Navigation() {
 
   useEffect(() => {
     const checkAuth = async () => {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
       const { data: { session } } = await supabase.auth.getSession();
       setIsAuthenticated(!!session);
     };
     
     checkAuth();
 
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsAuthenticated(!!session);
     });
@@ -31,6 +39,10 @@ export function Navigation() {
 
   const handleSignOut = async () => {
     try {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       router.push('/');

@@ -11,7 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { MenuCategoryList } from '@/components/dashboard/menus/menu-category-list';
 import { CreateCategoryDialog } from '@/components/dashboard/menus/create-category-dialog';
 import { getMenuDetails } from '@/lib/services/menu-service';
-import { supabase } from '@/lib/supabase';
+import { createBrowserClient } from '@supabase/ssr';
 import type { Menu, MenuCategory } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 
@@ -52,6 +52,10 @@ export function MenuDetails() {
 
     try {
       setIsSaving(true);
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
       const { data, error } = await supabase
         .from('menus')
         .update({
@@ -89,7 +93,11 @@ export function MenuDetails() {
 
       try {
         setIsLoading(true);
-        const { menu, categories } = await getMenuDetails(params.id as string);
+        const supabase = createBrowserClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        );
+        const { menu, categories } = await getMenuDetails(params.id as string, supabase);
         setMenu(menu);
         setCategories(categories);
       } catch (error: any) {

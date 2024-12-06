@@ -28,7 +28,7 @@ export function MenuItems({ categories }: MenuItemsProps) {
                 data-menu-item
                 data-item-name={item.name}
                 data-item-description={item.description}
-                className="flex items-start gap-4 p-4 rounded-lg border bg-card"
+                className="flex items-start gap-4 p-4 rounded-lg border bg-card hover:bg-accent transition-colors"
               >
                 {item.image_urls?.[0] && (
                   <div 

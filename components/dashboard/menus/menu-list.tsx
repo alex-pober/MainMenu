@@ -234,6 +234,8 @@ export function MenuList({ searchQuery }: MenuListProps) {
                     <div
                       ref={provided.innerRef}
                       {...provided.draggableProps}
+                      onClick={() => router.push(`/dashboard/menus/${menu.id}`)}
+                      className="cursor-pointer"
                     >
                       <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

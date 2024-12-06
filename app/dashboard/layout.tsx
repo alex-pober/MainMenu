@@ -210,7 +210,10 @@ export default function DashboardLayout({
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-[#f5f5f5] w-full">
+      <div className={cn(
+        "flex-1 flex flex-col overflow-hidden bg-[#f5f5f5] w-full",
+        collapsed ? "lg:ml-[60px]" : "lg:ml-[240px]" // Add margin-left equal to sidebar width
+      )}>
         <main className="flex-1 overflow-auto p-4 pt-16 lg:pt-4"> {/* Added padding-top for mobile menu button */}
           <div className="bg-background rounded-lg p-4">
             {children}

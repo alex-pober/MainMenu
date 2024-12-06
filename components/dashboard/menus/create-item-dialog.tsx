@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MultiImageUpload } from "@/components/ui/multi-image-upload";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from '@/lib/supabase';
+import { createBrowserClient } from '@supabase/ssr';
 import { uploadImages } from '@/lib/utils/upload';
 import type { CreateMenuItemInput, MenuItem } from '@/lib/types';
 
@@ -51,6 +51,23 @@ export function CreateItemDialog({
     setIsLoading(true);
 
     try {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+
+      // Get the current highest sort order
+      const { data: existingItems } = await supabase
+        .from('menu_items')
+        .select('sort_order')
+        .eq('category_id', categoryId)
+        .order('sort_order', { ascending: false })
+        .limit(1);
+
+      const nextSortOrder = existingItems && existingItems.length > 0 
+        ? existingItems[0].sort_order + 1 
+        : 0;
+
       console.log('Starting item creation with images:', imageFiles.length);
       let uploadedUrls: string[] = [];
       if (imageFiles.length > 0) {
@@ -60,7 +77,7 @@ export function CreateItemDialog({
 
       const { data, error } = await supabase
         .from('menu_items')
-        .insert([{ ...formData, image_urls: uploadedUrls }])
+        .insert([{ ...formData, image_urls: uploadedUrls, sort_order: nextSortOrder }])
         .select()
         .single();
 

@@ -14,11 +14,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreVertical } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { MoreVertical, GripVertical } from 'lucide-react';
+import { createBrowserClient } from '@supabase/ssr';
 import { useToast } from '@/hooks/use-toast';
 import { deleteImage } from '@/lib/utils/upload';
 import type { MenuItem } from '@/lib/types';
+import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 
 interface MenuItemListProps {
   categoryId: string;
@@ -36,6 +37,10 @@ export function MenuItemList({ categoryId, searchQuery, items, onItemsChange }: 
   useEffect(() => {
     const fetchItems = async () => {
       try {
+        const supabase = createBrowserClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        );
         const { data, error } = await supabase
           .from('menu_items')
           .select('*')
@@ -61,6 +66,10 @@ export function MenuItemList({ categoryId, searchQuery, items, onItemsChange }: 
 
   const handleToggleAvailability = async (item: MenuItem) => {
     try {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
       const { data, error } = await supabase
         .from('menu_items')
         .update({ is_available: !item.is_available })
@@ -90,6 +99,10 @@ export function MenuItemList({ categoryId, searchQuery, items, onItemsChange }: 
 
   const handleDeleteItem = async (item: MenuItem) => {
     try {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
       if (item.image_urls?.length > 0) {
         await Promise.all(item.image_urls.map(url => deleteImage(url)));
       }
@@ -101,7 +114,25 @@ export function MenuItemList({ categoryId, searchQuery, items, onItemsChange }: 
 
       if (error) throw error;
       
-      onItemsChange(items.filter(i => i.id !== item.id));
+      // Get remaining items and update their sort order
+      const remainingItems = items
+        .filter(i => i.id !== item.id)
+        .map((item, index) => ({
+          ...item,
+          sort_order: index
+        }));
+
+      // Update sort orders in database
+      await Promise.all(
+        remainingItems.map((item) =>
+          supabase
+            .from('menu_items')
+            .update({ sort_order: item.sort_order })
+            .eq('id', item.id)
+        )
+      );
+      
+      onItemsChange(remainingItems);
       
       toast({
         title: "Success",
@@ -125,92 +156,171 @@ export function MenuItemList({ categoryId, searchQuery, items, onItemsChange }: 
     ));
   };
 
+  const handleDragEnd = async (result: any) => {
+    if (!result.destination) return;
+
+    const items_copy = Array.from(items);
+    const [reorderedItem] = items_copy.splice(result.source.index, 1);
+    items_copy.splice(result.destination.index, 0, reorderedItem);
+
+    // Update sort_order for all affected items
+    const updatedItems = items_copy.map((item, index) => ({
+      ...item,
+      sort_order: index
+    }));
+
+    onItemsChange(updatedItems);
+
+    try {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+
+      // Update all items with new sort_order
+      await Promise.all(
+        updatedItems.map((item) =>
+          supabase
+            .from('menu_items')
+            .update({ sort_order: item.sort_order })
+            .eq('id', item.id)
+        )
+      );
+
+      toast({
+        title: "Success",
+        description: "Item order updated",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const filteredItems = items.filter(item =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.description?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
-      {filteredItems.map((item) => (
-        <Card key={item.id} className="group transition-all duration-200 hover:shadow-md bg-card/50">
-          <CardContent className="pt-6">
-            <div className="flex justify-between items-start mb-2">
-              <div className="flex-1">
-                <h3 className="font-semibold group-hover:text-primary transition-colors">
-                  {item.name}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {item.description}
-                </p>
-              </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="hover:text-primary">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => {
-                    setSelectedItem(item);
-                    setIsEditDialogOpen(true);
-                  }}>
-                    Edit Item
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleToggleAvailability(item)}>
-                    {item.is_available ? 'Mark Unavailable' : 'Mark Available'}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={() => handleDeleteItem(item)}
-                    className="text-destructive focus:text-destructive"
+    <DragDropContext onDragEnd={handleDragEnd}>
+      <Droppable droppableId={categoryId}>
+        {(provided) => (
+          <div 
+            {...provided.droppableProps}
+            ref={provided.innerRef}
+            className="grid gap-4"
+          >
+            {filteredItems.map((item, index) => (
+              <Draggable key={item.id} draggableId={item.id} index={index}>
+                {(provided, snapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
                   >
-                    Delete Item
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-            
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-lg font-semibold">${item.price.toFixed(2)}</div>
-              <Badge variant={item.is_available ? "default" : "secondary"}>
-                {item.is_available ? 'Available' : 'Unavailable'}
-              </Badge>
-            </div>
+                    <Card className={`bg-card/50 hover:shadow-md ${snapshot.isDragging && "shadow-lg"}`}>
+                      <CardContent className="pt-6">
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="flex items-center gap-2">
+                            <GripVertical className="h-5 w-5 text-muted-foreground/50" />
+                            <div className="flex-1">
+                              <h3 className="font-semibold">
+                                {item.name}
+                              </h3>
+                              <p className="text-sm text-muted-foreground">
+                                {item.description}
+                              </p>
+                            </div>
+                          </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="hover:text-primary">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => {
+                                setSelectedItem(item);
+                                setIsEditDialogOpen(true);
+                              }}>
+                                Edit Item
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleToggleAvailability(item)}>
+                                {item.is_available ? 'Mark Unavailable' : 'Mark Available'}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={() => handleDeleteItem(item)}
+                                className="text-destructive focus:text-destructive"
+                              >
+                                Delete Item
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                        
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="text-lg font-semibold">${item.price.toFixed(2)}</div>
+                          <Badge variant={item.is_available ? "default" : "secondary"}>
+                            {item.is_available ? 'Available' : 'Unavailable'}
+                          </Badge>
+                        </div>
 
-            {Array.isArray(item.image_urls) && item.image_urls.length > 0 && (
-              <div className="flex gap-2 mt-2 overflow-x-auto pb-2">
-                {item.image_urls.map((url) => (
-                  <Button
-                    key={url}
-                    variant="outline"
-                    className="p-0 h-16 w-16 relative overflow-hidden"
-                    onClick={() => setSelectedImage(url)}
-                  >
-                    <Image
-                      src={url}
-                      alt={`${item.name} preview`}
-                      fill
-                      className="object-cover"
-                      sizes="64px"
-                    />
-                  </Button>
-                ))}
-              </div>
-            )}
+                        {/* Dietary Information */}
+                        {item.dietary_info && item.dietary_info.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {item.dietary_info.map((info) => (
+                              <Badge key={info} variant="outline" className="text-xs">
+                                {info}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
 
-            {Array.isArray(item.dietary_info) && item.dietary_info.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-1">
-                {item.dietary_info.map((info) => (
-                  <Badge key={info} variant="outline" className="text-xs">
-                    {info}
-                  </Badge>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      ))}
+                        {/* Allergen Information */}
+                        {item.allergens && item.allergens.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {item.allergens.map((allergen) => (
+                              <Badge key={allergen} variant="destructive" className="text-xs bg-destructive/10 text-destructive">
+                                Contains {allergen}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
 
+                        {Array.isArray(item.image_urls) && item.image_urls.length > 0 && (
+                          <div className="flex gap-2 mt-2 overflow-x-auto pb-2">
+                            {item.image_urls.map((url) => (
+                              <Button
+                                key={url}
+                                variant="outline"
+                                className="p-0 h-16 w-16 relative overflow-hidden"
+                                onClick={() => setSelectedImage(url)}
+                              >
+                                <Image
+                                  src={url}
+                                  alt={`${item.name} preview`}
+                                  fill
+                                  className="object-cover"
+                                  sizes="64px"
+                                />
+                              </Button>
+                            ))}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </Draggable>
+            ))}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
       {selectedItem && (
         <EditItemDialog
           open={isEditDialogOpen}
@@ -227,6 +337,6 @@ export function MenuItemList({ categoryId, searchQuery, items, onItemsChange }: 
           imageUrl={selectedImage}
         />
       )}
-    </div>
+    </DragDropContext>
   );
 }

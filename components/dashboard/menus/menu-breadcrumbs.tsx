@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Breadcrumbs } from '@/components/ui/breadcrumb';
-import { supabase } from '@/lib/supabase';
+import { createBrowserClient } from '@supabase/ssr';
 import type { Menu } from '@/lib/types';
 
 export function MenuBreadcrumbs() {
@@ -15,7 +15,10 @@ export function MenuBreadcrumbs() {
       if (!params.id) return;
 
       try {
-          // @ts-ignore
+        const supabase = createBrowserClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        );
         const { data, error } = await supabase
           .from('menus')
           .select('*')
@@ -23,7 +26,6 @@ export function MenuBreadcrumbs() {
           .single();
 
         if (error) throw error;
-          // @ts-ignore
         setMenu(data);
       } catch (error) {
         console.error('Error fetching menu:', error);

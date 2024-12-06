@@ -1,9 +1,17 @@
-import { supabase } from '@/lib/supabase';
+import { createBrowserClient } from '@supabase/ssr';
 import { v4 as uuidv4 } from 'uuid';
 
 const BUCKET_NAME = 'menu-item-pictures';
 
+const getSupabaseClient = () => {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+};
+
 export async function uploadImages(imageFiles: string[]): Promise<string[]> {
+  const supabase = getSupabaseClient();
   try {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
@@ -64,6 +72,7 @@ export async function uploadImages(imageFiles: string[]): Promise<string[]> {
 }
 
 export async function deleteImage(imageUrl: string): Promise<void> {
+  const supabase = getSupabaseClient();
   try {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {

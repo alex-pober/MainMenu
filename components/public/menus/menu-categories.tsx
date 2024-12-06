@@ -42,11 +42,11 @@ export function MenuCategories({ categories, menuId }: MenuCategoriesProps) {
         {categories.map((category) => (
           <Button
             key={category.id}
-            variant="ghost"
+            variant="outline"
             size="sm"
             className={cn(
-              "whitespace-nowrap transition-colors",
-              activeCategory === category.id && "bg-primary text-primary-foreground"
+              "whitespace-nowrap transition-none hover:bg-transparent hover:text-foreground border-input",
+              activeCategory === category.id && "!bg-primary !text-primary-foreground hover:!bg-primary hover:!text-primary-foreground"
             )}
             onClick={() => {
               const element = document.getElementById(`category-${category.id}`);

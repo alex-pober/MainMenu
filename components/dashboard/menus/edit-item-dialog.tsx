@@ -23,7 +23,20 @@ const DIETARY_OPTIONS = [
   { id: 'vegetarian', label: 'Vegetarian' },
   { id: 'vegan', label: 'Vegan' },
   { id: 'gluten-free', label: 'Gluten Free' },
-  { id: 'dairy-free', label: 'Dairy Free' }
+  { id: 'dairy-free', label: 'Dairy Free' },
+  { id: 'keto', label: 'Keto' },
+  { id: 'paleo', label: 'Paleo' },
+  { id: 'low-carb', label: 'Low Carb' }
+];
+
+const ALLERGEN_OPTIONS = [
+  { id: 'nuts', label: 'Nuts' },
+  { id: 'dairy', label: 'Dairy' },
+  { id: 'eggs', label: 'Eggs' },
+  { id: 'soy', label: 'Soy' },
+  { id: 'wheat', label: 'Wheat' },
+  { id: 'fish', label: 'Fish' },
+  { id: 'shellfish', label: 'Shellfish' }
 ];
 
 export function EditItemDialog({ 
@@ -87,7 +100,7 @@ export function EditItemDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Edit Item</DialogTitle>
         </DialogHeader>
@@ -113,12 +126,11 @@ export function EditItemDialog({
                 required
               />
             </div>
-            <div className="grid gap-2">
+            <div className="grid w-full gap-1.5">
               <Label htmlFor="description">Description</Label>
               <Input
                 id="description"
-                placeholder="Enter item description"
-                value={formData.description}
+                value={formData.description || ''}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               />
             </div>
@@ -135,21 +147,48 @@ export function EditItemDialog({
                 required
               />
             </div>
-            <div className="space-y-2">
-              <Label>Dietary Information</Label>
-              <div className="grid grid-cols-2 gap-2">
-                {DIETARY_OPTIONS.map((option) => (
-                  <div key={option.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={option.id}
-                      checked={formData.dietary_info?.includes(option.id)}
-                      onCheckedChange={(checked) => 
-                        handleDietaryChange(option.id, checked as boolean)
-                      }
-                    />
-                    <Label htmlFor={option.id}>{option.label}</Label>
-                  </div>
-                ))}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Dietary Information</Label>
+                <div className="grid grid-cols-1 gap-2 border rounded-lg p-3">
+                  {DIETARY_OPTIONS.map((option) => (
+                    <div key={option.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`dietary-${option.id}`}
+                        checked={(formData.dietary_info || []).includes(option.id)}
+                        onCheckedChange={(checked) => handleDietaryChange(option.id, checked)}
+                      />
+                      <Label htmlFor={`dietary-${option.id}`} className="text-sm font-normal cursor-pointer">
+                        {option.label}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Allergen Information</Label>
+                <div className="grid grid-cols-1 gap-2 border rounded-lg p-3 border-destructive/20">
+                  {ALLERGEN_OPTIONS.map((option) => (
+                    <div key={option.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`allergen-${option.id}`}
+                        checked={(formData.allergens || []).includes(option.id)}
+                        onCheckedChange={(checked) => {
+                          setFormData(prev => ({
+                            ...prev,
+                            allergens: checked
+                              ? [...(prev.allergens || []), option.id]
+                              : (prev.allergens || []).filter(id => id !== option.id)
+                          }));
+                        }}
+                      />
+                      <Label htmlFor={`allergen-${option.id}`} className="text-sm font-normal cursor-pointer">
+                        {option.label}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

@@ -13,7 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { supabase } from '@/lib/supabase';
+import { createBrowserClient } from '@supabase/ssr';
 import { useToast } from '@/hooks/use-toast';
 import type { MenuCategory, MenuItem } from '@/lib/types';
 
@@ -33,6 +33,10 @@ export function MenuCategoryList({ categories, setCategories, searchQuery }: Men
   useEffect(() => {
     const fetchItemsForCategories = async () => {
       try {
+        const supabase = createBrowserClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        );
         const { data, error } = await supabase
           .from('menu_items')
           .select('*')
@@ -67,6 +71,10 @@ export function MenuCategoryList({ categories, setCategories, searchQuery }: Men
 
   const handleDeleteCategory = async (categoryId: string) => {
     try {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
       const { error } = await supabase
         .from('menu_categories')
         .delete()
@@ -116,10 +124,10 @@ export function MenuCategoryList({ categories, setCategories, searchQuery }: Men
     <div className="space-y-8">
       {filteredCategories.map((category) => (
         <div key={category.id} className="group">
-          <Card className="transition-all duration-200 hover:shadow-md bg-gradient-to-r from-background to-muted border-l-4 border-l-primary/20 group-hover:border-l-primary">
+          <Card className="bg-gradient-to-r from-background to-muted border-l-4 border-l-primary/20">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <div className="space-y-1">
-                <CardTitle className="text-xl transition-colors group-hover:text-primary">
+                <CardTitle className="text-xl">
                   {category.name}
                 </CardTitle>
                 {category.description && (
