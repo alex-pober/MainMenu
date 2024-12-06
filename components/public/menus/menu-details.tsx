@@ -225,21 +225,23 @@ export function MenuDetails({ menu, categories, activeFilters }: MenuDetailsProp
   const availabilityText = getAvailabilityText(menu);
 
   const filterItems = (items: MenuItem[] = []) => {
-    if (activeFilters.length === 0) return items;
-    return items.filter(item => 
-      activeFilters.every(filter => {
-        switch (filter) {
-          case 'vegan': return item.is_vegan;
-          case 'vegetarian': return item.is_vegetarian;
-          case 'spicy': return item.is_spicy;
-          case 'new': return item.is_new;
-          case 'limited': return item.is_limited_time;
-          case 'popular': return item.is_most_popular;
-          case 'special': return item.is_special;
-          default: return false;
-        }
-      })
-    );
+    if (activeFilters.length === 0) return items.sort((a, b) => a.sort_order - b.sort_order);
+    return items
+      .filter(item => 
+        activeFilters.every(filter => {
+          switch (filter) {
+            case 'vegan': return item.is_vegan;
+            case 'vegetarian': return item.is_vegetarian;
+            case 'spicy': return item.is_spicy;
+            case 'new': return item.is_new;
+            case 'limited': return item.is_limited_time;
+            case 'popular': return item.is_most_popular;
+            case 'special': return item.is_special;
+            default: return false;
+          }
+        })
+      )
+      .sort((a, b) => a.sort_order - b.sort_order);
   };
 
   return (
