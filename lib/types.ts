@@ -38,6 +38,8 @@ export interface MenuItem {
   is_limited_time: boolean;
   is_most_popular: boolean;
   is_special: boolean;
+  is_vegan?: boolean;
+  is_vegetarian?: boolean;
   sort_order: number;
   created_at: string;
   updated_at: string;

@@ -64,7 +64,7 @@ export function MenuItems({ categories }: MenuItemsProps) {
                       )}
                     </div>
                   </div>
-                  {(item.is_vegan || item.is_vegetarian || item.allergens?.length > 0) && (
+                  {(item.is_vegan || item.is_vegetarian) && (
                     <div className="flex flex-wrap gap-2 mt-2">
                       {item.is_vegan && (
                         <Badge variant="outline">
@@ -76,11 +76,6 @@ export function MenuItems({ categories }: MenuItemsProps) {
                           Vegetarian
                         </Badge>
                       )}
-                      {item.allergens?.map((allergen) => (
-                        <Badge key={allergen} variant="destructive">
-                          Contains {allergen}
-                        </Badge>
-                      ))}
                     </div>
                   )}
                 </div>
