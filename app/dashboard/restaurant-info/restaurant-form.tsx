@@ -5,7 +5,6 @@ import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { toast } from "sonner"
 import { useSupabase } from "@/hooks/use-supabase"
 import { Loader2, Save, Check, AlertCircle } from "lucide-react"
 
@@ -50,8 +49,8 @@ type RestaurantFormValues = z.infer<typeof restaurantFormSchema>
 
 export function RestaurantForm() {
   const [isLoading, setIsLoading] = useState(false)
-  // @ts-ignore
-  const { client: supabase, user, error: supabaseError } = useSupabase()
+  const { client: supabase, user, error: supabaseError, isLoading: isSupabaseLoading } = useSupabase({ requireAuth: true })
+  const [loadError, setLoadError] = useState<string | null>(null)
 
   const form = useForm<RestaurantFormValues>({
     resolver: zodResolver(restaurantFormSchema),
@@ -75,18 +74,47 @@ export function RestaurantForm() {
   })
 
   useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (form.formState.isDirty) {
+        e.preventDefault()
+        e.returnValue = ''
+        return ''
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [form.formState.isDirty])
+
+  useEffect(() => {
+    if (isSupabaseLoading) {
+      console.log('Waiting for Supabase to initialize...');
+      return;
+    }
+
     async function loadProfile() {
       try {
-        if (!supabase || !user) return;
+        setLoadError(null);
+        if (!supabase || !user) {
+          console.error('Supabase or user not available');
+          setLoadError('Unable to connect to the service');
+          return;
+        }
 
+        console.log('Loading profile for user:', user.id);
         const { data, error } = await supabase
           .from("restaurant_profiles")
           .select("*")
           .eq("user_id", user.id)
-          .single()
+          .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error loading profile:', error);
+          setLoadError(error.message);
+          return;
+        }
 
+        console.log('Loaded profile data:', data);
         if (data) {
           form.reset({
             name: data.name || "",
@@ -104,65 +132,81 @@ export function RestaurantForm() {
             logo_image_url: data.logo_image_url || "",
             business_hours: data.business_hours || null,
             social_media: data.social_media || null,
+          }, { 
+            keepDirty: false,
+            keepIsSubmitted: false,
+            keepTouched: false,
+            keepIsValid: false,
+            keepErrors: false,
           });
         }
       } catch (error) {
-        console.log('Profile loading error details:', {
-          error,
-          timestamp: new Date().toISOString()
-        });
-        toast.error('Failed to load restaurant profile')
+        console.error('Profile loading error:', error);
+        setLoadError(error instanceof Error ? error.message : 'Failed to load profile');
       }
     }
 
-    loadProfile()
-  }, [supabase, user, form])
+    loadProfile();
+  }, [supabase, user, form, isSupabaseLoading]);
 
   async function onSubmit(data: RestaurantFormValues) {
     try {
-      setIsLoading(true)
+      setIsLoading(true);
+      setLoadError(null);
+      
       if (!supabase || !user) {
-        toast.error('Unable to connect to the service')
-        return;
+        throw new Error('Unable to connect to the service');
       }
 
-      // First try to update
+      console.log('Updating profile with data:', data);
       const { data: updatedProfile, error: updateError } = await supabase
         .from("restaurant_profiles")
         .upsert({
           user_id: user.id,
           ...data,
           updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id'
         })
         .select()
         .single();
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('Profile update error:', updateError);
+        throw updateError;
+      }
 
-      // Update local state with the new data
-      form.reset(updatedProfile); // This marks the form as pristine
-
-      toast.success("Restaurant information updated", {
-        description: "Your changes have been saved successfully.",
-        duration: 3000,
+      console.log('Profile updated successfully:', updatedProfile);
+      form.reset(updatedProfile, {
+        keepDirty: false,
+        keepIsSubmitted: false,
+        keepTouched: false,
+        keepIsValid: false,
+        keepErrors: false,
       });
     } catch (error) {
-      console.log("Profile update error details:", {
-        error,
-        formData: data,
-        timestamp: new Date().toISOString()
-      });
-      toast.error("Failed to update restaurant information")
+      console.error('Profile update error:', error);
+      setLoadError(error instanceof Error ? error.message : 'Failed to update profile');
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
-  if (supabaseError) {
+  if (supabaseError || loadError) {
     return (
-      <div className="text-center">
-        <h2 className="text-lg font-semibold">Error</h2>
-        <p className="text-muted-foreground">Unable to connect to the service</p>
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          {supabaseError || loadError}
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (isSupabaseLoading) {
+    return (
+      <div className="flex justify-center items-center p-4">
+        <Loader2 className="h-6 w-6 animate-spin" />
       </div>
     );
   }
@@ -170,76 +214,6 @@ export function RestaurantForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        {form.formState.isDirty && (
-          <Alert 
-            variant="warning" 
-            className="mb-6 sticky top-4 z-10 animate-in fade-in slide-in-from-top duration-300 shadow-md"
-          >
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="flex items-center justify-between">
-              <span>
-                You have unsaved changes. Please save your changes before leaving this page.
-              </span>
-              <Button 
-                size="sm" 
-                onClick={form.handleSubmit(onSubmit)}
-                disabled={isLoading}
-                className="ml-4"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-3 h-3 mr-1" />
-                    Save Now
-                  </>
-                )}
-              </Button>
-            </AlertDescription>
-          </Alert>
-        )}
-
-        <div className="space-y-4">
-          <FormField
-            control={form.control}
-            name="banner_image_url"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Banner Image</FormLabel>
-                <FormControl>
-                  <ImageUpload
-                    value={field.value || null}
-                    onChange={field.onChange}
-                    imageType="banner"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="logo_image_url"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Logo</FormLabel>
-                <FormControl>
-                  <ImageUpload
-                    value={field.value || null}
-                    onChange={field.onChange}
-                    imageType="logo"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
         <FormField
           control={form.control}
           name="name"
@@ -257,6 +231,49 @@ export function RestaurantForm() {
             </FormItem>
           )}
         />
+
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="banner_image_url"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Banner Image</FormLabel>
+                <FormControl>
+                  <ImageUpload
+                    value={field.value}
+                    onChange={field.onChange}
+                    imageType="banner"
+                    uid={user?.id || ''}
+                    onUploadComplete={() => form.handleSubmit(onSubmit)()}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="logo_image_url"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Logo</FormLabel>
+                <FormControl>
+                  <ImageUpload
+                    value={field.value}
+                    onChange={field.onChange}
+                    imageType="logo"
+                    uid={user?.id || ''}
+                    onUploadComplete={() => form.handleSubmit(onSubmit)()}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
 
         <FormField
           control={form.control}

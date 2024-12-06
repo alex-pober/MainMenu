@@ -1,171 +1,223 @@
-import { useState, useCallback } from "react"
-import { FileWithPath, useDropzone } from "react-dropzone"
-import { toast } from "sonner"
-import { Trash2, Upload } from "lucide-react"
+import { useState, useCallback, useEffect } from "react"
+import { useDropzone } from "react-dropzone"
+import { useSupabase } from "@/hooks/use-supabase"
+import Image from 'next/image'
+import { ImageIcon, X, Upload, Loader2 } from "lucide-react"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { supabase } from "@/lib/supabase/client"
-import { ImageCropper } from "./image-cropper"
+import { toast } from "sonner"
 
 interface ImageUploadProps {
-  value: string | null
-  onChange: (url: string | null) => void
-  imageType?: "banner" | "logo"
-  className?: string
+  value?: string;
+  onChange?: (value: string) => void;
+  onUploadComplete?: () => void;
+  className?: string;
+  imageType?: "banner" | "logo";
+  uid: string;
 }
 
-export function ImageUpload({ value, onChange, imageType = "logo", className }: ImageUploadProps) {
-  const [isUploading, setIsUploading] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [cropImageUrl, setCropImageUrl] = useState<string | null>(null)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+export function ImageUpload({ 
+  value,
+  onChange,
+  onUploadComplete,
+  className,
+  imageType = "logo",
+  uid
+}: ImageUploadProps) {
+  const [isUploading, setIsUploading] = useState(false);
+  const { client: supabase, error: supabaseError, isLoading } = useSupabase();
 
-  const handleCropComplete = async (croppedBlob: Blob) => {
-    if (!selectedFile) return;
-    
-    try {
-      setIsUploading(true);
-      const file = new File([croppedBlob], selectedFile.name, { type: 'image/jpeg' });
-      await uploadImage(file);
-    } catch (error) {
-      console.error('Error uploading cropped image:', error);
-      toast.error('Failed to upload cropped image');
-    } finally {
-      setIsUploading(false);
-      setCropImageUrl(null);
-      setSelectedFile(null);
+  useEffect(() => {
+    if (supabaseError) {
+      console.error('Supabase initialization error:', supabaseError);
+      toast.error('Failed to initialize upload service');
     }
-  };
+  }, [supabaseError]);
 
-  const onDrop = useCallback(async (acceptedFiles: FileWithPath[]) => {
-    const file = acceptedFiles[0];
-    if (!file) return;
+  useEffect(() => {
+    if (!isLoading && supabase) {
+      console.log('Checking Supabase storage availability:', {
+        isStorageAvailable: !!supabase.storage,
+        buckets: supabase.storage?.listBuckets
+      });
+    }
+  }, [supabase, isLoading]);
 
-    setSelectedFile(file);
-    const imageUrl = URL.createObjectURL(file);
-    setCropImageUrl(imageUrl);
-  }, []);
-
-  const uploadImage = async (file: File) => {
-    try {
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${Math.random()}.${fileExt}`
-      const filePath = `${fileName}`
-
-      const { error: uploadError, data } = await supabase.storage
-        .from('restaurant-images')
-        .upload(filePath, file)
-
-      if (uploadError) {
-        throw uploadError
+  const onDrop = useCallback(
+    async (acceptedFiles: File[]) => {
+      if (!supabase) {
+        console.error('Supabase client not initialized');
+        toast.error('Upload service not available');
+        return;
       }
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('restaurant-images')
-        .getPublicUrl(filePath)
+      if (!supabase.storage) {
+        console.error('Supabase storage not configured');
+        toast.error('Image upload service not configured');
+        return;
+      }
 
-      onChange(publicUrl)
-      toast.success('Image uploaded successfully')
-    } catch (error) {
-      console.error('Error uploading image:', error)
-      toast.error('Failed to upload image')
-    }
-  }
+      if (acceptedFiles.length === 0) return;
+
+      console.log('Starting file upload process');
+      const file = acceptedFiles[0];
+      
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please upload an image file');
+        return;
+      }
+
+      // Validate file size (5MB limit)
+      const MAX_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+      if (file.size > MAX_SIZE) {
+        toast.error('Image size should be less than 5MB');
+        return;
+      }
+
+      console.log('File details:', {
+        name: file.name,
+        size: file.size,
+        type: file.type
+      });
+
+      setIsUploading(true);
+
+      try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${imageType}_${Math.random()}.${fileExt}`;
+        const filePath = `${uid}/${fileName}`;
+
+        console.log('Uploading file:', {
+          fileExt,
+          fileName,
+          filePath,
+          uid
+        });
+
+        // First check if the bucket exists
+        const { data: buckets, error: bucketsError } = await supabase.storage
+          .listBuckets();
+
+        if (bucketsError) {
+          console.error('Error checking storage buckets:', bucketsError);
+          throw new Error('Storage service unavailable');
+        }
+
+        const bucketExists = buckets.some(b => b.name === 'restaurant-images');
+        if (!bucketExists) {
+          console.error('Restaurant images bucket not found');
+          throw new Error('Storage not properly configured');
+        }
+
+        const { error: uploadError, data: uploadData } = await supabase.storage
+          .from('restaurant-images')
+          .upload(filePath, file);
+
+        console.log('Upload response:', {
+          error: uploadError,
+          data: uploadData
+        });
+
+        if (uploadError) {
+          console.error('Upload error details:', {
+            message: uploadError.message,
+          });
+          throw uploadError;
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('restaurant-images')
+          .getPublicUrl(filePath);
+
+        console.log('Public URL generated:', publicUrl);
+
+        if (onChange) {
+          onChange(publicUrl);
+        }
+
+        if (onUploadComplete) {
+          onUploadComplete();
+        }
+
+        toast.success('Image uploaded successfully');
+      } catch (error) {
+        console.error('Upload process error:', error);
+        toast.error(error instanceof Error ? error.message : 'Failed to upload image');
+      } finally {
+        setIsUploading(false);
+      }
+    },
+    [supabase, onChange, onUploadComplete, imageType, uid]
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'image/*': []
+      'image/*': ['.png', '.jpg', '.jpeg', '.gif']
     },
     maxFiles: 1,
     multiple: false
-  })
+  });
 
-  const handleDelete = async () => {
-    try {
-      setIsDeleting(true)
-      // Extract file name from URL
-      const fileName = value?.split('/').pop()
-      if (fileName) {
-        const { error } = await supabase.storage
-          .from('restaurant-images')
-          .remove([fileName])
-
-        if (error) throw error
-      }
-      onChange(null)
-      toast.success('Image deleted successfully')
-    } catch (error) {
-      console.error('Error deleting image:', error)
-      toast.error('Failed to delete image')
-    } finally {
-      setIsDeleting(false)
+  const removeImage = useCallback(() => {
+    if (onChange) {
+      onChange('');
     }
-  }
+  }, [onChange]);
+
+  const containerClasses = cn(
+    "relative flex flex-col items-center justify-center rounded-lg border border-dashed p-6 transition-all hover:bg-accent/5",
+    isDragActive && "border-muted-foreground/50",
+    !value && "hover:border-muted-foreground/50",
+    imageType === "banner" ? "h-24" : "h-22",
+    className
+  );
 
   return (
-    <div className={className}>
-      {cropImageUrl && (
-        <ImageCropper
-          imageUrl={cropImageUrl}
-          aspect={imageType === 'banner' ? 3 : 1}
-          onCropComplete={handleCropComplete}
-          onCancel={() => {
-            setCropImageUrl(null);
-            setSelectedFile(null);
-          }}
-        />
-      )}
-      
-      {!value ? (
-        <div
-          {...getRootProps()}
-          className={`
-            border-2 border-dashed rounded-lg p-4 text-center cursor-pointer
-            hover:bg-accent/50 transition-colors
-            ${isDragActive ? 'border-primary bg-accent/50' : 'border-muted-foreground/25'}
-          `}
-        >
-          <input {...getInputProps()} />
-          <div className="flex flex-col items-center gap-2">
-            <Upload className="w-8 h-8 text-muted-foreground/50" />
-            <p className="text-sm text-muted-foreground">
-              {isDragActive ? (
-                "Drop the image here"
-              ) : (
-                <>
-                  Drag & drop {imageType} image here, or click to select
-                  {imageType === 'banner' && (
-                    <span className="block text-xs text-muted-foreground/75">
-                      Recommended aspect ratio: 3:1
-                    </span>
-                  )}
-                </>
-              )}
-            </p>
+    <div className={containerClasses}>
+      <div {...getRootProps()} className="w-full h-full">
+        <input {...getInputProps()} />
+        {isUploading ? (
+          <div className="flex flex-col items-center justify-center gap-2">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">Uploading...</p>
           </div>
-        </div>
-      ) : (
-        <div className="relative group">
-          <img
-            src={value}
-            alt={`Restaurant ${imageType}`}
-            className={`w-full rounded-lg ${
-              imageType === 'banner' ? 'aspect-[3/1] object-cover' : 'aspect-square object-contain'
-            }`}
-          />
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 rounded-lg">
+        ) : value ? (
+          <div className="relative w-full h-full">
+            <Image
+              src={value}
+              alt="Uploaded image"
+              className="object-contain"
+              fill
+              sizes={imageType === "banner" ? "100vw" : "400px"}
+              priority
+            />
             <Button
-              variant="destructive"
-              size="sm"
-              onClick={handleDelete}
-              disabled={isDeleting}
+              type="button"
+              variant="secondary"
+              size="icon"
+              className="absolute top-2 right-2"
+              onClick={(e) => {
+                e.stopPropagation();
+                removeImage();
+              }}
             >
-              <Trash2 className="w-4 h-4 mr-2" />
-              {isDeleting ? 'Deleting...' : 'Delete'}
+              <X className="h-4 w-4" />
             </Button>
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="flex flex-col items-center justify-center gap-2">
+            <div className="flex items-center justify-center gap-2 text-muted-foreground">
+              <ImageIcon className="h-8 w-8" />
+              <Upload className="h-8 w-8" />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Drag & drop or click to upload
+            </p>
+          </div>
+        )}
+      </div>
     </div>
-  )
+  );
 }

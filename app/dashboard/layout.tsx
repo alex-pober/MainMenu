@@ -15,7 +15,8 @@ import {
   ExternalLink,
   LogOut,
   Info,
-  X
+  X,
+  Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -65,67 +66,43 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [collapsed, setCollapsed] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-  // @ts-ignore
-  const { client: supabase, error: supabaseError, user } = useSupabase();
+  const { client: supabase, user, isLoading } = useSupabase();
 
   useEffect(() => {
-    if (!supabase) return;
+    if (!isLoading && !user) {
+      console.log('No user found, redirecting to auth');
+      router.push('/auth');
+    }
+  }, [isLoading, user, router]);
 
-    const checkUser = async () => {
-      try {
-        const { data: { user }, error } = await supabase.auth.getUser();
-        if (error) throw error;
-        if (!user) {
-          router.push('/auth');
-          return;
-        }
-        setUserId(user.id);
-      } catch (error) {
-        console.error('Error fetching user:', error);
-        router.push('/auth');
-      }
-    };
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'SIGNED_OUT') {
-          setUserId(null);
-          router.push('/auth');
-        } else if (event === 'SIGNED_IN' && session?.user) {
-          setUserId(session.user.id);
-        }
-      }
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="flex flex-col items-center gap-2">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Loading...</p>
+        </div>
+      </div>
     );
+  }
 
-    checkUser();
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [router, supabase]);
+  // Don't render anything if not authenticated
+  if (!user) {
+    return null;
+  }
 
   const handleSignOut = async () => {
-    if (!supabase) {
-      console.error('Error signing out: Unable to connect to authentication service');
-      return;
-    }
-
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      router.push('/');
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
+    if (!supabase) return;
+    await supabase.auth.signOut();
+    router.push('/auth');
   };
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen overflow-hidden">
       {/* Mobile Menu Button */}
       <button
         className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-md bg-background shadow-sm"
@@ -143,102 +120,96 @@ export default function DashboardLayout({
       )}
 
       {/* Sidebar */}
-      <div className={cn(
-        "bg-[#f5f5f5] transition-all duration-300 fixed lg:relative z-50",
-        "h-full lg:h-screen",
+      <aside className={cn(
+        "fixed inset-y-0 left-0 z-50 flex flex-col bg-background border-r transition-all duration-300",
         collapsed ? "w-[60px]" : "w-[240px]",
-        // Mobile styles
-        "lg:translate-x-0",
-        isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
-        <div className="flex flex-col h-full">
-          <div className="h-14 flex items-center justify-between px-3">
+        {/* Sidebar Header */}
+        <div className="flex items-center justify-between p-4 border-b">
+          <h1 className={cn(
+            "font-bold transition-all duration-300",
+            collapsed ? "opacity-0 w-0" : "opacity-100"
+          )}>
+            MainMenu
+          </h1>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setCollapsed(!collapsed)}
+            className="hidden lg:flex"
+          >
+            {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+          </Button>
+          {/* Show close button on mobile */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="lg:hidden"
+          >
+            <X size={20} />
+          </Button>
+        </div>
+
+        {/* View Public Menu Button */}
+        <div className="p-2">
+          <Button
+            variant="default"
+            className="w-full justify-start gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
+            onClick={() => window.open(`/menus/${user.id}`, '_blank')}
+          >
+            <ExternalLink size={20} />
             <span className={cn(
-              "font-semibold transition-all duration-300",
+              "transition-all duration-300",
               collapsed ? "opacity-0 w-0" : "opacity-100"
             )}>
-              MainMenu
+              View Public Menu
             </span>
-            {/* Hide collapse button on mobile */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setCollapsed(!collapsed)}
-              className="hidden lg:flex"
-            >
-              {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-            </Button>
-            {/* Show close button on mobile */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="lg:hidden"
-            >
-              <X size={20} />
-            </Button>
-          </div>
-
-          {/* View Public Menu Button */}
-          <div className="p-2">
-            <Button
-              variant="default"
-              className="w-full justify-start gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
-              onClick={() => userId && window.open(`/menus/${userId}`, '_blank')}
-              disabled={!userId}
-            >
-              <ExternalLink size={20} />
-              <span className={cn(
-                "transition-all duration-300",
-                collapsed ? "opacity-0 w-0" : "opacity-100"
-              )}>
-                View Public Menu
-              </span>
-            </Button>
-          </div>
-
-          <nav className="flex-1 p-2 space-y-1">
-            {sidebarLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setIsMobileMenuOpen(false)} // Close mobile menu when clicking a link
-                className={cn(
-                  "flex items-center gap-2 px-3 py-2 rounded-md transition-colors",
-                  (pathname === link.href || (link.href !== '/dashboard' && pathname.startsWith(link.href)))
-                    ? "bg-secondary text-secondary-foreground hover:bg-secondary/90"
-                    : "hover:bg-secondary/50 hover:text-secondary-foreground text-muted-foreground"
-                )}
-              >
-                <link.icon size={20} />
-                <span className={cn(
-                  "transition-all duration-300",
-                  collapsed ? "opacity-0 w-0" : "opacity-100"
-                )}>
-                  {link.title}
-                </span>
-              </Link>
-            ))}
-          </nav>
-
-          {/* Sign Out Button */}
-          <div className="p-2 border-t">
-            <Button
-              variant="ghost"
-              className="w-full justify-start gap-2 text-muted-foreground hover:text-accent-foreground"
-              onClick={handleSignOut}
-            >
-              <LogOut size={20} />
-              <span className={cn(
-                "transition-all duration-300",
-                collapsed ? "opacity-0 w-0" : "opacity-100"
-              )}>
-                Sign Out
-              </span>
-            </Button>
-          </div>
+          </Button>
         </div>
-      </div>
+
+        <nav className="flex-1 p-2 space-y-1">
+          {sidebarLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={() => setIsMobileMenuOpen(false)} // Close mobile menu when clicking a link
+              className={cn(
+                "flex items-center gap-2 px-3 py-2 rounded-md transition-colors",
+                (pathname === link.href || (link.href !== '/dashboard' && pathname.startsWith(link.href)))
+                  ? "bg-secondary text-secondary-foreground hover:bg-secondary/90"
+                  : "hover:bg-secondary/50 hover:text-secondary-foreground text-muted-foreground"
+              )}
+            >
+              <link.icon size={20} />
+              <span className={cn(
+                "transition-all duration-300",
+                collapsed ? "opacity-0 w-0" : "opacity-100"
+              )}>
+                {link.title}
+              </span>
+            </Link>
+          ))}
+        </nav>
+
+        {/* Sign Out Button */}
+        <div className="p-2 border-t">
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-2 text-muted-foreground hover:text-accent-foreground"
+            onClick={handleSignOut}
+          >
+            <LogOut size={20} />
+            <span className={cn(
+              "transition-all duration-300",
+              collapsed ? "opacity-0 w-0" : "opacity-100"
+            )}>
+              Sign Out
+            </span>
+          </Button>
+        </div>
+      </aside>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden bg-[#f5f5f5] w-full">

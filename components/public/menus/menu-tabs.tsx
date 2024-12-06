@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import type { Menu, MenuCategory } from '@/lib/types';
 import { MenuDetails } from './menu-details';
+import { DietaryFilter } from './dietary-filter';
 
 interface MenuTabsProps {
   userId: string;
@@ -16,6 +17,8 @@ export function MenuTabs({ userId }: MenuTabsProps) {
   const [menus, setMenus] = useState<Menu[]>([]);
   const [categories, setCategories] = useState<Record<string, MenuCategory[]>>({});
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [availableDietaryOptions, setAvailableDietaryOptions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const supabase = createClientComponentClient();
 
@@ -43,13 +46,27 @@ export function MenuTabs({ userId }: MenuTabsProps) {
 
           // Organize categories by menu_id and sort them by sort_order
           const categoriesByMenu: Record<string, MenuCategory[]> = {};
+          const dietaryOptions = new Set<string>();
+          
           menuData.forEach(menu => {
             const sortedCategories = (menu.menu_categories || []).sort(
               (a, b) => a.sort_order - b.sort_order
             );
+            
+            // Collect all unique dietary options
+            sortedCategories.forEach(category => {
+              category.menu_items?.forEach(item => {
+                item.dietary_info?.forEach(info => {
+                  dietaryOptions.add(info.toLowerCase());
+                });
+              });
+            });
+            
             categoriesByMenu[menu.id] = sortedCategories;
           });
+          
           setCategories(categoriesByMenu);
+          setAvailableDietaryOptions(Array.from(dietaryOptions).sort());
         }
       } catch (error) {
         console.error('Error fetching menus:', error);
@@ -97,9 +114,14 @@ export function MenuTabs({ userId }: MenuTabsProps) {
         </ScrollArea>
       </div>
 
+      <DietaryFilter 
+        availableOptions={availableDietaryOptions}
+        onFilterChange={setActiveFilters} 
+      />
+
       {menus.map((menu) => (
-        <TabsContent key={menu.id} value={menu.id} className="mt-6">
-          <MenuDetails menu={menu} categories={categories[menu.id] || []} />
+        <TabsContent key={menu.id} value={menu.id} className="mt-4">
+          <MenuDetails menu={menu} categories={categories[menu.id] || []} activeFilters={activeFilters} />
         </TabsContent>
       ))}
     </Tabs>

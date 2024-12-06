@@ -20,8 +20,7 @@ export default function AuthPage() {
   const [password, setPassword] = useState('');
   const router = useRouter();
   const { toast } = useToast();
-  // @ts-ignore
-  const { client: supabase, error: supabaseError } = useSupabase();
+  const { client: supabase, user, error: supabaseError } = useSupabase();
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,27 +45,24 @@ export default function AuthPage() {
         if (error) throw error;
 
         router.push('/dashboard');
-        router.refresh();
       } else {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
-          },
         });
 
         if (error) throw error;
 
         toast({
           title: "Success",
-          description: "Check your email to confirm your account",
+          description: "Please check your email to verify your account",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Authentication error:', error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "An error occurred",
+        description: error?.message || "An error occurred during authentication",
         variant: "destructive",
       });
     } finally {
@@ -90,21 +86,17 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
         <Card className="w-full max-w-md">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center">
-              {isLogin ? 'Welcome back' : 'Create an account'}
-            </CardTitle>
-            <CardDescription className="text-center">
-              {isLogin
-                ? 'Enter your credentials to sign in'
-                : 'Enter your email to create an account'}
+          <CardHeader>
+            <CardTitle>Welcome to MainMenu</CardTitle>
+            <CardDescription>
+              {isLogin ? "Sign in to your account" : "Create a new account"}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -114,10 +106,10 @@ export default function AuthPage() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="hello@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  placeholder="Enter your email"
                 />
               </div>
               <div className="space-y-2">
@@ -128,6 +120,7 @@ export default function AuthPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  placeholder="Enter your password"
                 />
               </div>
               <Button
@@ -135,21 +128,27 @@ export default function AuthPage() {
                 className="w-full"
                 disabled={isLoading}
               >
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isLogin ? 'Sign in' : 'Create account'}
-              </Button>
-              <Button
-                type="button"
-                variant="link"
-                className="w-full"
-                onClick={() => setIsLogin(!isLogin)}
-                disabled={isLoading}
-              >
-                {isLogin
-                  ? "Don't have an account? Sign up"
-                  : 'Already have an account? Sign in'}
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {isLogin ? "Signing in..." : "Creating account..."}
+                  </>
+                ) : (
+                  <>{isLogin ? "Sign In" : "Create Account"}</>
+                )}
               </Button>
             </form>
+            <div className="mt-4 text-center">
+              <Button
+                variant="link"
+                onClick={() => setIsLogin(!isLogin)}
+                className="text-sm"
+              >
+                {isLogin
+                  ? "Don't have an account? Create one"
+                  : "Already have an account? Sign in"}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </motion.div>
