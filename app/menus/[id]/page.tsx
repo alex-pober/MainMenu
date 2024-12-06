@@ -190,7 +190,7 @@ export default function MenuPage() {
         transition={{ duration: 0.6 }}
         className="max-w-3xl mx-auto"
       >
-        <div className="mb-4">
+        <div className="mb-1">
           {user?.banner_image_url ? (
             <div className="relative">
               <div className="w-full py-4 sm:py-6 flex items-center justify-center">

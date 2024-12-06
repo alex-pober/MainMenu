@@ -209,9 +209,6 @@ export function MenuDetails({ menu, categories, activeFilters }: MenuDetailsProp
     <div className="relative">
       {(menu.description || !isAvailable || availabilityText) && (
         <div className="text-center space-y-3">
-          {menu.description && (
-            <p className="text-muted-foreground">{menu.description}</p>
-          )}
           {!isAvailable && (
             <p className="text-sm text-yellow-600 dark:text-yellow-500">
               This menu is currently unavailable

@@ -40,9 +40,9 @@ export function DietaryFilter({ availableOptions, onFilterChange }: DietaryFilte
   if (availableOptions.length === 0) return null;
 
   return (
-    <div className="w-full py-2">
+    <div className="w-full max-w-3xl mx-auto">
       <ScrollArea className="w-full whitespace-nowrap">
-        <div className="flex space-x-2 px-4">
+        <div className="flex gap-1.5 px-4">
           {availableOptions.map(option => (
             <Button
               key={option}
@@ -50,17 +50,22 @@ export function DietaryFilter({ availableOptions, onFilterChange }: DietaryFilte
               size="sm"
               onClick={() => toggleFilter(option)}
               className={cn(
-                "transition-colors",
-                activeFilters.includes(option) && "bg-primary text-primary-foreground hover:bg-primary/90"
+                "transition-colors border-muted-foreground/20 h-8 px-3",
+                activeFilters.includes(option)
+                  ? "bg-primary text-primary-foreground hover:bg-primary/90 border-primary"
+                  : "hover:bg-muted hover:text-foreground"
               )}
             >
-              {DIETARY_ICONS[option] || '•'} {option.split('-').map(word => 
-                word.charAt(0).toUpperCase() + word.slice(1)
-              ).join(' ')}
+              <span className="mr-1">{DIETARY_ICONS[option] || '•'}</span>
+              <span className="capitalize">
+                {option.split('-').map(word => 
+                  word.charAt(0).toUpperCase() + word.slice(1)
+                ).join(' ')}
+              </span>
             </Button>
           ))}
         </div>
-        <ScrollBar orientation="horizontal" />
+        <ScrollBar orientation="horizontal" className="mt-1.5" />
       </ScrollArea>
     </div>
   );
