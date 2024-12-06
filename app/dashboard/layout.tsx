@@ -72,13 +72,16 @@ export default function DashboardLayout({
   const { client: supabase, user, isLoading } = useSupabase();
 
   useEffect(() => {
-    if (!isLoading && !user) {
-      console.log('No user found, redirecting to auth');
-      router.push('/auth');
+    if (!isLoading) {
+      if (!user) {
+        console.log('No user found in dashboard, redirecting to auth');
+        router.replace('/auth');
+      } else {
+        console.log('User authenticated in dashboard:', user.id);
+      }
     }
   }, [isLoading, user, router]);
 
-  // Show loading state
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -88,11 +91,6 @@ export default function DashboardLayout({
         </div>
       </div>
     );
-  }
-
-  // Don't render anything if not authenticated
-  if (!user) {
-    return null;
   }
 
   const handleSignOut = async () => {

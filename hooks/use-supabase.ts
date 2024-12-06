@@ -33,7 +33,7 @@ export function useSupabase(options: UseSupabaseOptions = { requireAuth: false }
               autoRefreshToken: true,
               detectSessionInUrl: true,
               storageKey: 'mainmenu-auth',
-              storage: window.localStorage
+              storage: typeof window !== 'undefined' ? window.localStorage : undefined
             }
           }
         );
@@ -42,7 +42,8 @@ export function useSupabase(options: UseSupabaseOptions = { requireAuth: false }
       setClient(supabaseInstance);
 
       // Always check initial session
-      supabaseInstance.auth.getSession().then(({ data: { session }, error: sessionError }) => {
+      const initSession = async () => {
+        const { data: { session }, error: sessionError } = await supabaseInstance.auth.getSession();
         if (sessionError) {
           console.error('Error fetching session:', sessionError);
           setError(sessionError.message);
@@ -50,9 +51,17 @@ export function useSupabase(options: UseSupabaseOptions = { requireAuth: false }
           return;
         }
         
-        setUser(session?.user ?? null);
+        if (session) {
+          console.log('Session found:', session.user.id);
+          setUser(session.user);
+        } else {
+          console.log('No session found');
+          setUser(null);
+        }
         setIsLoading(false);
-      });
+      };
+
+      initSession();
 
       // Listen for auth changes
       const { data: { subscription } } = supabaseInstance.auth.onAuthStateChange((event, session) => {
