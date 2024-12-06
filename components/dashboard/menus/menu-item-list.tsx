@@ -43,7 +43,25 @@ export function MenuItemList({ categoryId, searchQuery, items, onItemsChange }: 
         );
         const { data, error } = await supabase
           .from('menu_items')
-          .select('*')
+          .select(`
+            id,
+            category_id,
+            name,
+            description,
+            price,
+            image_urls,
+            is_available,
+            is_spicy,
+            is_new,
+            is_limited_time,
+            is_most_popular,
+            is_special,
+            is_vegan,
+            is_vegetarian,
+            sort_order,
+            created_at,
+            updated_at
+          `)
           .eq('category_id', categoryId)
           .order('sort_order');
 

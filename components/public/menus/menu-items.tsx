@@ -64,13 +64,18 @@ export function MenuItems({ categories }: MenuItemsProps) {
                       )}
                     </div>
                   </div>
-                  {(item.dietary_info?.length > 0 || item.allergens?.length > 0) && (
+                  {(item.is_vegan || item.is_vegetarian || item.allergens?.length > 0) && (
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {item.dietary_info?.map((info) => (
-                        <Badge key={info} variant="outline">
-                          {info}
+                      {item.is_vegan && (
+                        <Badge variant="outline">
+                          Vegan
                         </Badge>
-                      ))}
+                      )}
+                      {item.is_vegetarian && (
+                        <Badge variant="outline">
+                          Vegetarian
+                        </Badge>
+                      )}
                       {item.allergens?.map((allergen) => (
                         <Badge key={allergen} variant="destructive">
                           Contains {allergen}

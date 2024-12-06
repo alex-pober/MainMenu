@@ -28,10 +28,44 @@ export function MenuTabs({ userId }: MenuTabsProps) {
         const { data: menuData, error: menuError } = await supabase
           .from('menus')
           .select(`
-            *,
+            id,
+            user_id,
+            name,
+            description,
+            status,
+            display_order,
+            is_always_available,
+            available_start_time,
+            available_end_time,
+            created_at,
+            updated_at,
             menu_categories (
-              *,
-              menu_items (*)
+              id,
+              menu_id,
+              name,
+              description,
+              sort_order,
+              created_at,
+              updated_at,
+              menu_items (
+                id,
+                category_id,
+                name,
+                description,
+                price,
+                image_urls,
+                is_available,
+                is_spicy,
+                is_new,
+                is_limited_time,
+                is_most_popular,
+                is_special,
+                is_vegan,
+                is_vegetarian,
+                sort_order,
+                created_at,
+                updated_at
+              )
             )
           `)
           .eq('user_id', userId)
