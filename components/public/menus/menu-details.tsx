@@ -33,6 +33,18 @@ interface MenuItemDialogProps {
 function MenuItemDialog({ item, open, onOpenChange }: MenuItemDialogProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
 
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [open]);
+
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent>
@@ -117,6 +129,24 @@ export function MenuDetails({ menu, categories, activeFilters }: MenuDetailsProp
       setIsSidebarOpen(true);
     }
   }, [selectedCategory]);
+
+  useEffect(() => {
+    if (isSidebarOpen) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    };
+  }, [isSidebarOpen]);
 
   const closeSidebar = () => {
     setIsSidebarOpen(false);
@@ -265,51 +295,50 @@ export function MenuDetails({ menu, categories, activeFilters }: MenuDetailsProp
             )}
           </div>
           <div className="flex-1 overflow-y-auto">
-            <div className="p-4 lg:p-6 space-y-4">
+            <div className="p-4 lg:p-6 divide-y divide-border">
               {selectedCategory && filterItems(selectedCategory.menu_items).map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-start justify-between gap-3 lg:gap-4 cursor-pointer hover:bg-muted/50 p-3 rounded-lg transition-colors"
+                  className="flex flex-col cursor-pointer hover:bg-muted/50 py-6 first:pt-0 last:pb-0 rounded-lg transition-colors"
                   onClick={() => setSelectedItem(item)}
                 >
-                  <div className="flex-1 min-w-0">
-                    <div className="space-y-1">
-                      <div className="flex justify-between items-center gap-2">
-                        <h5 className="font-medium truncate">{item.name}</h5>
-                        <div className="text-sm text-muted-foreground font-medium whitespace-nowrap">
-                          ${item.price.toFixed(2)}
-                        </div>
-                      </div>
-                      {item.description && (
-                        <p className="text-sm text-muted-foreground/80 line-clamp-2 text-pretty">
-                          {item.description}
-                        </p>
-                      )}
-                      {(item.dietary_info?.length > 0 || !item.is_available) && (
-                        <div className="flex flex-wrap gap-1">
-                          {!item.is_available && (
-                            <Badge variant="secondary" className="text-xs">Unavailable</Badge>
-                          )}
-                          {item.dietary_info?.map((info: string) => (
-                            <Badge key={info} variant="outline" className="text-xs">
-                              {info}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
                   {item.image_urls?.[0] && (
-                    <div className="flex-shrink-0">
-                      <Image
-                        src={item.image_urls[0]}
-                        alt={item.name}
-                        width={80}
-                        height={80}
-                        className="h-16 w-16 lg:h-20 lg:w-20 object-cover rounded-md"
-                      />
+                    <div className="w-full mb-4">
+                      <div className="relative aspect-[16/10] w-full overflow-hidden rounded-lg">
+                        <Image
+                          src={item.image_urls[0]}
+                          alt={item.name}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
                     </div>
                   )}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-start gap-2">
+                      <h5 className="text-lg font-medium">{item.name}</h5>
+                      <div className="text-base font-medium whitespace-nowrap">
+                        ${item.price.toFixed(2)}
+                      </div>
+                    </div>
+                    {item.description && (
+                      <p className="text-sm text-muted-foreground/80 line-clamp-2 text-pretty">
+                        {item.description}
+                      </p>
+                    )}
+                    {(item.dietary_info?.length > 0 || !item.is_available) && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {!item.is_available && (
+                          <Badge variant="secondary">Unavailable</Badge>
+                        )}
+                        {item.dietary_info?.map((info: string) => (
+                          <Badge key={info} variant="outline">
+                            {info}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
