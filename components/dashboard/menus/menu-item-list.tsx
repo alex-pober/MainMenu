@@ -269,27 +269,43 @@ export function MenuItemList({ categoryId, searchQuery, items, onItemsChange }: 
                           </Badge>
                         </div>
 
-                        {/* Dietary Information */}
-                        {item.dietary_info && item.dietary_info.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-2">
-                            {item.dietary_info.map((info) => (
-                              <Badge key={info} variant="outline" className="text-xs">
-                                {info}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Allergen Information */}
-                        {item.allergens && item.allergens.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {item.allergens.map((allergen) => (
-                              <Badge key={allergen} variant="destructive" className="text-xs bg-destructive/10 text-destructive">
-                                Contains {allergen}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {item.is_vegan && (
+                            <Badge variant="outline" className="text-xs bg-emerald-100 text-emerald-800 border-emerald-200">
+                              🌱 Vegan
+                            </Badge>
+                          )}
+                          {item.is_vegetarian && (
+                            <Badge variant="outline" className="text-xs bg-lime-100 text-lime-800 border-lime-200">
+                              🥚 Vegetarian
+                            </Badge>
+                          )}
+                          {item.is_spicy && (
+                            <Badge variant="outline" className="text-xs bg-red-100 text-red-800 border-red-200">
+                              🌶️ Spicy
+                            </Badge>
+                          )}
+                          {item.is_new && (
+                            <Badge variant="outline" className="text-xs bg-blue-100 text-blue-800 border-blue-200">
+                              ✨ New
+                            </Badge>
+                          )}
+                          {item.is_limited_time && (
+                            <Badge variant="outline" className="text-xs bg-yellow-100 text-yellow-800 border-yellow-200">
+                              ⏳ Limited Time
+                            </Badge>
+                          )}
+                          {item.is_most_popular && (
+                            <Badge variant="outline" className="text-xs bg-purple-100 text-purple-800 border-purple-200">
+                              🔥 Most Popular
+                            </Badge>
+                          )}
+                          {item.is_special && (
+                            <Badge variant="outline" className="text-xs bg-green-100 text-green-800 border-green-200">
+                              ⭐ Special
+                            </Badge>
+                          )}
+                        </div>
 
                         {Array.isArray(item.image_urls) && item.image_urls.length > 0 && (
                           <div className="flex gap-2 mt-2 overflow-x-auto pb-2">

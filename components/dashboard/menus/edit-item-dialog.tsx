@@ -19,26 +19,6 @@ interface EditItemDialogProps {
   onItemUpdated: (item: MenuItem) => void;
 }
 
-const DIETARY_OPTIONS = [
-  { id: 'vegetarian', label: 'Vegetarian' },
-  { id: 'vegan', label: 'Vegan' },
-  { id: 'gluten-free', label: 'Gluten Free' },
-  { id: 'dairy-free', label: 'Dairy Free' },
-  { id: 'keto', label: 'Keto' },
-  { id: 'paleo', label: 'Paleo' },
-  { id: 'low-carb', label: 'Low Carb' }
-];
-
-const ALLERGEN_OPTIONS = [
-  { id: 'nuts', label: 'Nuts' },
-  { id: 'dairy', label: 'Dairy' },
-  { id: 'eggs', label: 'Eggs' },
-  { id: 'soy', label: 'Soy' },
-  { id: 'wheat', label: 'Wheat' },
-  { id: 'fish', label: 'Fish' },
-  { id: 'shellfish', label: 'Shellfish' }
-];
-
 export function EditItemDialog({ 
   open, 
   onOpenChange, 
@@ -52,8 +32,13 @@ export function EditItemDialog({
     description: item.description,
     price: item.price,
     is_available: item.is_available,
-    dietary_info: item.dietary_info,
-    allergens: item.allergens
+    is_spicy: item.is_spicy || false,
+    is_new: item.is_new || false,
+    is_limited_time: item.is_limited_time || false,
+    is_most_popular: item.is_most_popular || false,
+    is_special: item.is_special || false,
+    is_vegan: item.is_vegan || false,
+    is_vegetarian: item.is_vegetarian || false
   });
   const { toast } = useToast();
 
@@ -87,15 +72,6 @@ export function EditItemDialog({
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleDietaryChange = (optionId: string, checked: boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      dietary_info: checked
-        ? [...(prev.dietary_info || []), optionId]
-        : (prev.dietary_info || []).filter(id => id !== optionId)
-    }));
   };
 
   return (
@@ -147,47 +123,78 @@ export function EditItemDialog({
                 required
               />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Dietary Information</Label>
-                <div className="grid grid-cols-1 gap-2 border rounded-lg p-3">
-                  {DIETARY_OPTIONS.map((option) => (
-                    <div key={option.id} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`dietary-${option.id}`}
-                        checked={(formData.dietary_info || []).includes(option.id)}
-                        onCheckedChange={(checked) => handleDietaryChange(option.id, checked)}
-                      />
-                      <Label htmlFor={`dietary-${option.id}`} className="text-sm font-normal cursor-pointer">
-                        {option.label}
-                      </Label>
-                    </div>
-                  ))}
+            <div className="space-y-4">
+              <Label>Item Labels</Label>
+              <div className="grid grid-cols-1 gap-2 border rounded-lg p-3">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="is_vegan"
+                    checked={formData.is_vegan}
+                    onCheckedChange={(checked) => setFormData({ ...formData, is_vegan: checked as boolean })}
+                  />
+                  <Label htmlFor="is_vegan" className="text-sm font-normal cursor-pointer">
+                    Vegan 🌱
+                  </Label>
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Allergen Information</Label>
-                <div className="grid grid-cols-1 gap-2 border rounded-lg p-3 border-destructive/20">
-                  {ALLERGEN_OPTIONS.map((option) => (
-                    <div key={option.id} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`allergen-${option.id}`}
-                        checked={(formData.allergens || []).includes(option.id)}
-                        onCheckedChange={(checked) => {
-                          setFormData(prev => ({
-                            ...prev,
-                            allergens: checked
-                              ? [...(prev.allergens || []), option.id]
-                              : (prev.allergens || []).filter(id => id !== option.id)
-                          }));
-                        }}
-                      />
-                      <Label htmlFor={`allergen-${option.id}`} className="text-sm font-normal cursor-pointer">
-                        {option.label}
-                      </Label>
-                    </div>
-                  ))}
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="is_vegetarian"
+                    checked={formData.is_vegetarian}
+                    onCheckedChange={(checked) => setFormData({ ...formData, is_vegetarian: checked as boolean })}
+                  />
+                  <Label htmlFor="is_vegetarian" className="text-sm font-normal cursor-pointer">
+                    Vegetarian 🥚
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="is_spicy"
+                    checked={formData.is_spicy}
+                    onCheckedChange={(checked) => setFormData({ ...formData, is_spicy: checked as boolean })}
+                  />
+                  <Label htmlFor="is_spicy" className="text-sm font-normal cursor-pointer">
+                    Spicy 🌶️
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="is_new"
+                    checked={formData.is_new}
+                    onCheckedChange={(checked) => setFormData({ ...formData, is_new: checked as boolean })}
+                  />
+                  <Label htmlFor="is_new" className="text-sm font-normal cursor-pointer">
+                    New ✨
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="is_limited_time"
+                    checked={formData.is_limited_time}
+                    onCheckedChange={(checked) => setFormData({ ...formData, is_limited_time: checked as boolean })}
+                  />
+                  <Label htmlFor="is_limited_time" className="text-sm font-normal cursor-pointer">
+                    Limited Time ⏳
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="is_most_popular"
+                    checked={formData.is_most_popular}
+                    onCheckedChange={(checked) => setFormData({ ...formData, is_most_popular: checked as boolean })}
+                  />
+                  <Label htmlFor="is_most_popular" className="text-sm font-normal cursor-pointer">
+                    Most Popular 🔥
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="is_special"
+                    checked={formData.is_special}
+                    onCheckedChange={(checked) => setFormData({ ...formData, is_special: checked as boolean })}
+                  />
+                  <Label htmlFor="is_special" className="text-sm font-normal cursor-pointer">
+                    Special ⭐
+                  </Label>
                 </div>
               </div>
             </div>

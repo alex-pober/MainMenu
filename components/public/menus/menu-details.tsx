@@ -93,18 +93,46 @@ function MenuItemDialog({ item, open, onOpenChange }: MenuItemDialogProps) {
               {item.description && (
                 <p className="text-muted-foreground text-lg leading-relaxed">{item.description}</p>
               )}
-              {item.dietary_info?.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {item.dietary_info.map((info: string) => (
-                    <Badge key={info} variant="outline" className="text-sm px-3 py-1">
-                      {info}
-                    </Badge>
-                  ))}
-                </div>
-              )}
-              {!item.is_available && (
-                <Badge variant="secondary" className="text-sm px-3 py-1">Currently Unavailable</Badge>
-              )}
+              <div className="flex flex-wrap gap-2">
+                {!item.is_available && (
+                  <Badge variant="secondary" className="text-sm px-3 py-1">Currently Unavailable</Badge>
+                )}
+                {item.is_vegan && (
+                  <Badge variant="outline" className="text-sm px-3 py-1 bg-emerald-100 text-emerald-800 border-emerald-200">
+                    🌱 Vegan
+                  </Badge>
+                )}
+                {item.is_vegetarian && (
+                  <Badge variant="outline" className="text-sm px-3 py-1 bg-lime-100 text-lime-800 border-lime-200">
+                    🥚 Vegetarian
+                  </Badge>
+                )}
+                {item.is_spicy && (
+                  <Badge variant="outline" className="text-sm px-3 py-1 bg-red-100 text-red-800 border-red-200">
+                    🌶️ Spicy
+                  </Badge>
+                )}
+                {item.is_new && (
+                  <Badge variant="outline" className="text-sm px-3 py-1 bg-blue-100 text-blue-800 border-blue-200">
+                    ✨ New
+                  </Badge>
+                )}
+                {item.is_limited_time && (
+                  <Badge variant="outline" className="text-sm px-3 py-1 bg-yellow-100 text-yellow-800 border-yellow-200">
+                    ⏳ Limited Time
+                  </Badge>
+                )}
+                {item.is_most_popular && (
+                  <Badge variant="outline" className="text-sm px-3 py-1 bg-purple-100 text-purple-800 border-purple-200">
+                    🔥 Most Popular
+                  </Badge>
+                )}
+                {item.is_special && (
+                  <Badge variant="outline" className="text-sm px-3 py-1 bg-green-100 text-green-800 border-green-200">
+                    ⭐ Special
+                  </Badge>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -199,9 +227,18 @@ export function MenuDetails({ menu, categories, activeFilters }: MenuDetailsProp
   const filterItems = (items: MenuItem[] = []) => {
     if (activeFilters.length === 0) return items;
     return items.filter(item => 
-      activeFilters.every(filter => 
-        item.dietary_info?.includes(filter)
-      )
+      activeFilters.every(filter => {
+        switch (filter) {
+          case 'vegan': return item.is_vegan;
+          case 'vegetarian': return item.is_vegetarian;
+          case 'spicy': return item.is_spicy;
+          case 'new': return item.is_new;
+          case 'limited': return item.is_limited_time;
+          case 'popular': return item.is_most_popular;
+          case 'special': return item.is_special;
+          default: return false;
+        }
+      })
     );
   };
 
@@ -323,16 +360,36 @@ export function MenuDetails({ menu, categories, activeFilters }: MenuDetailsProp
                         {item.description}
                       </p>
                     )}
-                    {(item.dietary_info?.length > 0 || !item.is_available) && (
+                    {(item.is_spicy || item.is_new || item.is_limited_time || item.is_most_popular || item.is_special || !item.is_available) && (
                       <div className="flex flex-wrap gap-1.5">
                         {!item.is_available && (
                           <Badge variant="secondary">Unavailable</Badge>
                         )}
-                        {item.dietary_info?.map((info: string) => (
-                          <Badge key={info} variant="outline">
-                            {info}
+                        {item.is_spicy && (
+                          <Badge variant="outline" className="text-xs bg-red-100 text-red-800 border-red-200">
+                            🌶️ Spicy
                           </Badge>
-                        ))}
+                        )}
+                        {item.is_new && (
+                          <Badge variant="outline" className="text-xs bg-blue-100 text-blue-800 border-blue-200">
+                            ✨ New
+                          </Badge>
+                        )}
+                        {item.is_limited_time && (
+                          <Badge variant="outline" className="text-xs bg-yellow-100 text-yellow-800 border-yellow-200">
+                            ⏳ Limited Time
+                          </Badge>
+                        )}
+                        {item.is_most_popular && (
+                          <Badge variant="outline" className="text-xs bg-purple-100 text-purple-800 border-purple-200">
+                            🔥 Most Popular
+                          </Badge>
+                        )}
+                        {item.is_special && (
+                          <Badge variant="outline" className="text-xs bg-green-100 text-green-800 border-green-200">
+                            ⭐ Special
+                          </Badge>
+                        )}
                       </div>
                     )}
                   </div>

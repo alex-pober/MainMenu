@@ -33,8 +33,11 @@ export interface MenuItem {
   price: number;
   image_urls: string[];
   is_available: boolean;
-  dietary_info: string[];
-  allergens: string[];
+  is_spicy: boolean;
+  is_new: boolean;
+  is_limited_time: boolean;
+  is_most_popular: boolean;
+  is_special: boolean;
   sort_order: number;
   created_at: string;
   updated_at: string;

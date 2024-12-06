@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import type { Menu, MenuCategory } from '@/lib/types';
 import { MenuDetails } from './menu-details';
-import { DietaryFilter } from './dietary-filter';
+import { ItemFilter } from './item-filter';
 
 interface MenuTabsProps {
   userId: string;
@@ -18,7 +18,7 @@ export function MenuTabs({ userId }: MenuTabsProps) {
   const [categories, setCategories] = useState<Record<string, MenuCategory[]>>({});
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
-  const [availableDietaryOptions, setAvailableDietaryOptions] = useState<string[]>([]);
+  const [availableLabels, setAvailableLabels] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const supabase = createClientComponentClient();
 
@@ -46,19 +46,23 @@ export function MenuTabs({ userId }: MenuTabsProps) {
 
           // Organize categories by menu_id and sort them by sort_order
           const categoriesByMenu: Record<string, MenuCategory[]> = {};
-          const dietaryOptions = new Set<string>();
+          const labels = new Set<string>();
           
           menuData.forEach(menu => {
             const sortedCategories = (menu.menu_categories || []).sort(
               (a, b) => a.sort_order - b.sort_order
             );
             
-            // Collect all unique dietary options
+            // Collect all used labels
             sortedCategories.forEach(category => {
               category.menu_items?.forEach(item => {
-                item.dietary_info?.forEach(info => {
-                  dietaryOptions.add(info.toLowerCase());
-                });
+                if (item.is_vegan) labels.add('vegan');
+                if (item.is_vegetarian) labels.add('vegetarian');
+                if (item.is_spicy) labels.add('spicy');
+                if (item.is_new) labels.add('new');
+                if (item.is_limited_time) labels.add('limited');
+                if (item.is_most_popular) labels.add('popular');
+                if (item.is_special) labels.add('special');
               });
             });
             
@@ -66,7 +70,7 @@ export function MenuTabs({ userId }: MenuTabsProps) {
           });
           
           setCategories(categoriesByMenu);
-          setAvailableDietaryOptions(Array.from(dietaryOptions).sort());
+          setAvailableLabels(Array.from(labels));
         }
       } catch (error) {
         console.error('Error fetching menus:', error);
@@ -123,12 +127,9 @@ export function MenuTabs({ userId }: MenuTabsProps) {
           </TabsContent>
         ))}
 
-        {availableDietaryOptions.length > 0 && (
+        {availableLabels.length > 0 && (
           <div className="w-full border-t border-b py-3 bg-background/50 backdrop-blur supports-[backdrop-filter]:bg-background/50">
-            <DietaryFilter 
-              availableOptions={availableDietaryOptions}
-              onFilterChange={setActiveFilters} 
-            />
+            <ItemFilter availableLabels={availableLabels} onFilterChange={setActiveFilters} />
           </div>
         )}
       </div>
