@@ -1,7 +1,7 @@
 // @ts-nocheck
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,21 +26,29 @@ export function EditItemDialog({
   onItemUpdated 
 }: EditItemDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [imageFiles, setImageFiles] = useState<string[]>(item.image_urls);
-  const [formData, setFormData] = useState<Partial<MenuItem>>({
-    name: item.name,
-    description: item.description,
-    price: item.price,
-    is_available: item.is_available,
-    is_spicy: item.is_spicy || false,
-    is_new: item.is_new || false,
-    is_limited_time: item.is_limited_time || false,
-    is_most_popular: item.is_most_popular || false,
-    is_special: item.is_special || false,
-    is_vegan: item.is_vegan || false,
-    is_vegetarian: item.is_vegetarian || false
-  });
+  const [imageFiles, setImageFiles] = useState<string[]>([]);
+  const [formData, setFormData] = useState<Partial<MenuItem>>({});
   const { toast } = useToast();
+
+  // Update form data when item changes or dialog opens
+  useEffect(() => {
+    if (open && item) {
+      setFormData({
+        name: item.name,
+        description: item.description,
+        price: item.price,
+        is_available: item.is_available,
+        is_spicy: item.is_spicy || false,
+        is_new: item.is_new || false,
+        is_limited_time: item.is_limited_time || false,
+        is_most_popular: item.is_most_popular || false,
+        is_special: item.is_special || false,
+        is_vegan: item.is_vegan || false,
+        is_vegetarian: item.is_vegetarian || false
+      });
+      setImageFiles(item.image_urls || []);
+    }
+  }, [item, open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

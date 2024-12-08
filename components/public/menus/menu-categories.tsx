@@ -37,23 +37,24 @@ export function MenuCategories({ categories, menuId }: MenuCategoriesProps) {
   }, []);
 
   return (
-    <nav className="sticky top-0 z-10 -mx-4 px-4 py-4 bg-background border-b mb-8">
-      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+    <nav className="sticky top-0 z-10 -mx-4 px-4 py-4 bg-background mb-8">
+      <div className="space-y-2 max-w-2xl mx-auto">
         {categories.map((category) => (
           <Button
             key={category.id}
-            variant="outline"
-            size="sm"
+            variant="ghost"
+            size="lg"
             className={cn(
-              "whitespace-nowrap transition-none hover:bg-transparent hover:text-foreground border-input",
-              activeCategory === category.id && "!bg-primary !text-primary-foreground hover:!bg-primary hover:!text-primary-foreground"
+              "w-full flex justify-between items-center px-4 py-3 rounded-lg hover:bg-accent",
+              activeCategory === category.id && "bg-accent"
             )}
             onClick={() => {
               const element = document.getElementById(`category-${category.id}`);
               element?.scrollIntoView({ behavior: 'smooth' });
             }}
           >
-            {category.name}
+            <span className="text-lg">{category.name}</span>
+            <span className="text-sm text-muted-foreground">0 items</span>
           </Button>
         ))}
       </div>

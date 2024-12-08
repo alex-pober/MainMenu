@@ -18,13 +18,6 @@ interface CreateItemDialogProps {
   onItemCreated: (item: MenuItem) => void;
 }
 
-const DIETARY_OPTIONS = [
-  { id: 'vegetarian', label: 'Vegetarian' },
-  { id: 'vegan', label: 'Vegan' },
-  { id: 'gluten-free', label: 'Gluten Free' },
-  { id: 'dairy-free', label: 'Dairy Free' }
-];
-
 export function CreateItemDialog({ 
   open, 
   onOpenChange, 
@@ -33,14 +26,19 @@ export function CreateItemDialog({
 }: CreateItemDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [imageFiles, setImageFiles] = useState<string[]>([]);
-  const [formData, setFormData] = useState<CreateMenuItemInput>({
+  const [formData, setFormData] = useState<Partial<MenuItem>>({
     category_id: categoryId,
     name: '',
     description: '',
     price: 0,
     is_available: true,
-    dietary_info: [],
-    allergens: [],
+    is_spicy: false,
+    is_new: false,
+    is_limited_time: false,
+    is_most_popular: false,
+    is_special: false,
+    is_vegan: false,
+    is_vegetarian: false,
     image_urls: [],
     sort_order: 0
   });
@@ -99,8 +97,13 @@ export function CreateItemDialog({
         description: '',
         price: 0,
         is_available: true,
-        dietary_info: [],
-        allergens: [],
+        is_spicy: false,
+        is_new: false,
+        is_limited_time: false,
+        is_most_popular: false,
+        is_special: false,
+        is_vegan: false,
+        is_vegetarian: false,
         image_urls: [],
         sort_order: 0
       });
@@ -119,15 +122,6 @@ export function CreateItemDialog({
     }
   };
 
-  const handleDietaryChange = (optionId: string, checked: boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      dietary_info: checked
-        ? [...prev.dietary_info, optionId]
-        : prev.dietary_info.filter(id => id !== optionId)
-    }));
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -137,17 +131,7 @@ export function CreateItemDialog({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
-              <Label>Item Images</Label>
-              <MultiImageUpload
-                value={imageFiles}
-                onChange={setImageFiles}
-                onRemove={(index) => {
-                  setImageFiles(prev => prev.filter((_, i) => i !== index));
-                }}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="name">Item Name</Label>
+              <Label>Item Name</Label>
               <Input
                 id="name"
                 placeholder="Enter item name"
@@ -170,29 +154,118 @@ export function CreateItemDialog({
               <Input
                 id="price"
                 type="number"
-                step="0.01"
                 min="0"
-                placeholder="Enter price"
+                step="0.01"
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
                 required
               />
             </div>
-            <div className="space-y-2">
-              <Label>Dietary Information</Label>
-              <div className="grid grid-cols-2 gap-2">
-                {DIETARY_OPTIONS.map((option) => (
-                  <div key={option.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={option.id}
-                      checked={formData.dietary_info.includes(option.id)}
-                      onCheckedChange={(checked) => 
-                        handleDietaryChange(option.id, checked as boolean)
-                      }
-                    />
-                    <Label htmlFor={option.id}>{option.label}</Label>
-                  </div>
-                ))}
+
+            <div className="grid gap-2">
+              <Label>Images</Label>
+              <MultiImageUpload
+                value={imageFiles}
+                onChange={setImageFiles}
+                onRemove={(index) => {
+                  setImageFiles(prev => prev.filter((_, i) => i !== index));
+                }}
+              />
+              <div className="text-xs text-muted-foreground">
+                Upload up to 5 images. Supported formats: JPEG, PNG, WebP. Max size: 5MB each.
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="is_available">Availability</Label>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="is_available"
+                  checked={formData.is_available}
+                  onCheckedChange={(checked) => 
+                    setFormData({ ...formData, is_available: checked as boolean })
+                  }
+                />
+                <label
+                  htmlFor="is_available"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  Available
+                </label>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <Label>Item Labels</Label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="is_spicy"
+                    checked={formData.is_spicy}
+                    onCheckedChange={(checked) => 
+                      setFormData({ ...formData, is_spicy: checked as boolean })
+                    }
+                  />
+                  <label htmlFor="is_spicy" className="text-sm">Spicy</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="is_new"
+                    checked={formData.is_new}
+                    onCheckedChange={(checked) => 
+                      setFormData({ ...formData, is_new: checked as boolean })
+                    }
+                  />
+                  <label htmlFor="is_new" className="text-sm">New Item</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="is_limited_time"
+                    checked={formData.is_limited_time}
+                    onCheckedChange={(checked) => 
+                      setFormData({ ...formData, is_limited_time: checked as boolean })
+                    }
+                  />
+                  <label htmlFor="is_limited_time" className="text-sm">Limited Time</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="is_most_popular"
+                    checked={formData.is_most_popular}
+                    onCheckedChange={(checked) => 
+                      setFormData({ ...formData, is_most_popular: checked as boolean })
+                    }
+                  />
+                  <label htmlFor="is_most_popular" className="text-sm">Most Popular</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="is_special"
+                    checked={formData.is_special}
+                    onCheckedChange={(checked) => 
+                      setFormData({ ...formData, is_special: checked as boolean })
+                    }
+                  />
+                  <label htmlFor="is_special" className="text-sm">Special</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="is_vegan"
+                    checked={formData.is_vegan}
+                    onCheckedChange={(checked) => 
+                      setFormData({ ...formData, is_vegan: checked as boolean })
+                    }
+                  />
+                  <label htmlFor="is_vegan" className="text-sm">Vegan</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="is_vegetarian"
+                    checked={formData.is_vegetarian}
+                    onCheckedChange={(checked) => 
+                      setFormData({ ...formData, is_vegetarian: checked as boolean })
+                    }
+                  />
+                  <label htmlFor="is_vegetarian" className="text-sm">Vegetarian</label>
+                </div>
               </div>
             </div>
           </div>

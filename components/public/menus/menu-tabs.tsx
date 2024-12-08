@@ -135,7 +135,7 @@ export function MenuTabs({ userId }: MenuTabsProps) {
 
   return (
     <Tabs value={activeMenu || undefined} onValueChange={setActiveMenu} className="w-full max-w-5xl mx-auto px-4">
-      <div className="flex flex-col items-center space-y-4 mb-6">
+      <div className="flex flex-col items-center space-y-4 mb-2">
         <div className="w-full max-w-2xl">
           <ScrollArea className="w-full">
             <TabsList className="inline-flex h-10 items-center justify-center rounded-full bg-muted p-1 w-full">

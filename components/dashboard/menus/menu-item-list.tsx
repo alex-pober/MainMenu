@@ -242,109 +242,114 @@ export function MenuItemList({ categoryId, searchQuery, items, onItemsChange }: 
                   >
                     <Card className={`bg-card/50 hover:shadow-md ${snapshot.isDragging && "shadow-lg"}`}>
                       <CardContent className="pt-6">
-                        <div className="flex justify-between items-start mb-2">
-                          <div className="flex items-center gap-2">
-                            <GripVertical className="h-5 w-5 text-muted-foreground/50" />
-                            <div className="flex-1">
-                              <h3 className="font-semibold">
+                        <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+                          <div className="flex items-center gap-2 flex-1 min-w-0 w-full md:w-auto">
+                            <GripVertical className="h-5 w-5 text-muted-foreground/50 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold truncate">
                                 {item.name}
                               </h3>
-                              <p className="text-sm text-muted-foreground">
+                              <p className="text-sm text-muted-foreground line-clamp-2">
                                 {item.description}
                               </p>
+                              <div className="flex flex-wrap gap-1 mt-2">
+                                {item.is_vegan && (
+                                  <Badge variant="outline" className="text-xs bg-emerald-100 text-emerald-800 border-emerald-200">
+                                    🌱 Vegan
+                                  </Badge>
+                                )}
+                                {item.is_vegetarian && (
+                                  <Badge variant="outline" className="text-xs bg-lime-100 text-lime-800 border-lime-200">
+                                    🥚 Vegetarian
+                                  </Badge>
+                                )}
+                                {item.is_spicy && (
+                                  <Badge variant="outline" className="text-xs bg-red-100 text-red-800 border-red-200">
+                                    🌶️ Spicy
+                                  </Badge>
+                                )}
+                                {item.is_new && (
+                                  <Badge variant="outline" className="text-xs bg-blue-100 text-blue-800 border-blue-200">
+                                    ✨ New
+                                  </Badge>
+                                )}
+                                {item.is_limited_time && (
+                                  <Badge variant="outline" className="text-xs bg-yellow-100 text-yellow-800 border-yellow-200">
+                                    ⏳ Limited Time
+                                  </Badge>
+                                )}
+                                {item.is_most_popular && (
+                                  <Badge variant="outline" className="text-xs bg-purple-100 text-purple-800 border-purple-200">
+                                    🔥 Most Popular
+                                  </Badge>
+                                )}
+                                {item.is_special && (
+                                  <Badge variant="outline" className="text-xs bg-green-100 text-green-800 border-green-200">
+                                    ⭐ Special
+                                  </Badge>
+                                )}
+                              </div>
                             </div>
                           </div>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="hover:text-primary">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => {
-                                setSelectedItem(item);
-                                setIsEditDialogOpen(true);
-                              }}>
-                                Edit Item
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleToggleAvailability(item)}>
-                                {item.is_available ? 'Mark Unavailable' : 'Mark Available'}
-                              </DropdownMenuItem>
-                              <DropdownMenuItem 
-                                onClick={() => handleDeleteItem(item)}
-                                className="text-destructive focus:text-destructive"
-                              >
-                                Delete Item
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                        
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="text-lg font-semibold">${item.price.toFixed(2)}</div>
-                          <Badge variant={item.is_available ? "default" : "secondary"}>
-                            {item.is_available ? 'Available' : 'Unavailable'}
-                          </Badge>
-                        </div>
+                          
+                          <div className="flex flex-row md:flex-col items-start md:items-end gap-2 w-full md:w-auto">
+                            <div className="flex flex-wrap md:flex-nowrap items-center gap-2 w-full md:w-auto justify-between md:justify-end">
+                              {Array.isArray(item.image_urls) && item.image_urls.length > 0 && (
+                                <div className="flex gap-2 order-3 md:order-none">
+                                  {item.image_urls.map((url) => (
+                                    <Button
+                                      key={url}
+                                      variant="outline"
+                                      className="p-0 h-12 w-12 md:h-16 md:w-16 relative overflow-hidden"
+                                      onClick={() => setSelectedImage(url)}
+                                    >
+                                      <Image
+                                        src={url}
+                                        alt={`${item.name} preview`}
+                                        fill
+                                        className="object-cover"
+                                        sizes="(max-width: 768px) 48px, 64px"
+                                      />
+                                    </Button>
+                                  ))}
 
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {item.is_vegan && (
-                            <Badge variant="outline" className="text-xs bg-emerald-100 text-emerald-800 border-emerald-200">
-                              🌱 Vegan
-                            </Badge>
-                          )}
-                          {item.is_vegetarian && (
-                            <Badge variant="outline" className="text-xs bg-lime-100 text-lime-800 border-lime-200">
-                              🥚 Vegetarian
-                            </Badge>
-                          )}
-                          {item.is_spicy && (
-                            <Badge variant="outline" className="text-xs bg-red-100 text-red-800 border-red-200">
-                              🌶️ Spicy
-                            </Badge>
-                          )}
-                          {item.is_new && (
-                            <Badge variant="outline" className="text-xs bg-blue-100 text-blue-800 border-blue-200">
-                              ✨ New
-                            </Badge>
-                          )}
-                          {item.is_limited_time && (
-                            <Badge variant="outline" className="text-xs bg-yellow-100 text-yellow-800 border-yellow-200">
-                              ⏳ Limited Time
-                            </Badge>
-                          )}
-                          {item.is_most_popular && (
-                            <Badge variant="outline" className="text-xs bg-purple-100 text-purple-800 border-purple-200">
-                              🔥 Most Popular
-                            </Badge>
-                          )}
-                          {item.is_special && (
-                            <Badge variant="outline" className="text-xs bg-green-100 text-green-800 border-green-200">
-                              ⭐ Special
-                            </Badge>
-                          )}
-                        </div>
-
-                        {Array.isArray(item.image_urls) && item.image_urls.length > 0 && (
-                          <div className="flex gap-2 mt-2 overflow-x-auto pb-2">
-                            {item.image_urls.map((url) => (
-                              <Button
-                                key={url}
-                                variant="outline"
-                                className="p-0 h-16 w-16 relative overflow-hidden"
-                                onClick={() => setSelectedImage(url)}
-                              >
-                                <Image
-                                  src={url}
-                                  alt={`${item.name} preview`}
-                                  fill
-                                  className="object-cover"
-                                  sizes="64px"
-                                />
-                              </Button>
-                            ))}
+                            
+                              
+                                </div>
+                              )}
+                              <div>
+                                <div className="text-lg font-semibold order-1 md:order-none">${item.price.toFixed(2)}</div>
+                                <Badge variant={item.is_available ? "default" : "secondary"} className="order-2 md:order-none">
+                                  {item.is_available ? 'Available' : 'Unavailable'}
+                                </Badge>
+                              </div>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="hover:text-primary order-4 md:order-none">
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => {
+                                    setSelectedItem(item);
+                                    setIsEditDialogOpen(true);
+                                  }}>
+                                    Edit Item
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleToggleAvailability(item)}>
+                                    {item.is_available ? 'Mark Unavailable' : 'Mark Available'}
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem 
+                                    onClick={() => handleDeleteItem(item)}
+                                    className="text-destructive focus:text-destructive"
+                                  >
+                                    Delete Item
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
                           </div>
-                        )}
+                        </div>
                       </CardContent>
                     </Card>
                   </div>

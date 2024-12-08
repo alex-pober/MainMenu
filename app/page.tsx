@@ -4,6 +4,7 @@ import { PricingSection } from '@/components/sections/pricing';
 import { TestimonialsSection } from '@/components/sections/testimonials';
 import { NewsletterSection } from '@/components/sections/newsletter';
 import { DemoSection } from '@/components/sections/demo';
+import { Footer } from '@/components/footer';
 
 export default function Home() {
   return (
@@ -14,6 +15,7 @@ export default function Home() {
       <PricingSection />
       <TestimonialsSection />
       <NewsletterSection />
+      <Footer />
     </div>
   );
 }

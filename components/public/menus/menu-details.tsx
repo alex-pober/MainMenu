@@ -268,8 +268,8 @@ export function MenuDetails({ menu, categories, activeFilters }: MenuDetailsProp
         />
       )}
       <div className={cn(
-        "grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 transition-[margin] duration-300",
-        isSidebarOpen && "lg:mr-[540px]"
+        "max-w-2xl mx-auto space-y-4 pb-32",
+        isSidebarOpen && "lg:opacity-50 pointer-events-none transition-opacity duration-300"
       )}>
         {categories.map((category) => {
           const filteredItems = filterItems(category.menu_items);
@@ -284,14 +284,18 @@ export function MenuDetails({ menu, categories, activeFilters }: MenuDetailsProp
               )}
               onClick={() => setSelectedCategory(category)}
             >
-              <CardContent className="p-4 space-y-1.5">
-                <h4 className="text-lg font-semibold leading-none">{category.name}</h4>
-                {category.description && (
-                  <p className="text-sm text-muted-foreground line-clamp-2">{category.description}</p>
-                )}
-                <p className="text-sm text-muted-foreground">
-                  {filteredItems.length} items
-                </p>
+              <CardContent className="p-6">
+                <div className="flex justify-between items-center gap-4">
+                  <div className="space-y-1.5">
+                    <h4 className="text-xl font-semibold leading-none">{category.name}</h4>
+                    {category.description && (
+                      <p className="text-sm text-muted-foreground">{category.description}</p>
+                    )}
+                  </div>
+                  <p className="text-sm text-muted-foreground whitespace-nowrap">
+                    {filteredItems.length} items
+                  </p>
+                </div>
               </CardContent>
             </Card>
           );
@@ -331,7 +335,7 @@ export function MenuDetails({ menu, categories, activeFilters }: MenuDetailsProp
             )}
           </div>
           <div className="flex-1 overflow-y-auto">
-            <div className="p-4 lg:p-6 divide-y divide-border">
+            <div className="p-4 lg:p-6 pb-32 divide-y divide-border">
               {selectedCategory && filterItems(selectedCategory.menu_items).map((item) => (
                 <div
                   key={item.id}

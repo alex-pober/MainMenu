@@ -1,9 +1,8 @@
 "use client";
 
 import Image from 'next/image';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
 interface ImagePreviewDialogProps {
   open: boolean;
@@ -19,6 +18,9 @@ export function ImagePreviewDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl p-0 overflow-hidden">
+        <VisuallyHidden>
+          <DialogTitle>Image Preview</DialogTitle>
+        </VisuallyHidden>
         <div className="relative aspect-[4/3] w-full">
           <Image
             src={imageUrl}
@@ -28,14 +30,6 @@ export function ImagePreviewDialog({
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 50vw"
           />
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute top-2 right-2"
-          onClick={() => onOpenChange(false)}
-        >
-          <X className="h-4 w-4" />
-        </Button>
       </DialogContent>
     </Dialog>
   );
