@@ -30,123 +30,13 @@ interface MenuItemDialogProps {
   onOpenChange: (open: boolean) => void
 }
 
-function MenuItemDialog({ item, open, onOpenChange }: MenuItemDialogProps) {
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
-
-  useEffect(() => {
-    if (open) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [open]);
-
-  return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent>
-        <div className="max-w-2xl w-full mx-auto h-full flex flex-col">
-          <DrawerHeader className="px-4 pt-6 flex-shrink-0">
-            <DrawerTitle className="text-2xl">{item.name}</DrawerTitle>
-          </DrawerHeader>
-          <div className="flex-1 overflow-y-auto px-4 pb-16">
-            {item.image_urls && item.image_urls.length > 0 && (
-              <div className="space-y-6 mb-8">
-                <div className="relative">
-                  <div className="aspect-[16/10] overflow-hidden rounded-lg">
-                    <Image
-                      src={item.image_urls[selectedImageIndex]}
-                      alt={item.name}
-                      width={640}
-                      height={400}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
-                {item.image_urls.length > 1 && (
-                  <div className="flex justify-center gap-3 overflow-x-auto pb-2">
-                    {item.image_urls.map((imageUrl: string, index: number) => (
-                      <button
-                        key={index}
-                        onClick={() => setSelectedImageIndex(index)}
-                        className={`relative flex-shrink-0 w-24 h-16 rounded-md overflow-hidden border-2 transition-colors ${
-                          index === selectedImageIndex ? 'border-primary' : 'border-transparent hover:border-primary/50'
-                        }`}
-                      >
-                        <Image
-                          src={imageUrl}
-                          alt={`${item.name} - Image ${index + 1}`}
-                          width={96}
-                          height={64}
-                          className="w-full h-full object-cover"
-                        />
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-            <div className="space-y-6">
-              {item.description && (
-                <p className="text-muted-foreground text-lg leading-relaxed">{item.description}</p>
-              )}
-              <div className="flex flex-wrap gap-2">
-                {!item.is_available && (
-                  <Badge variant="secondary" className="text-sm px-3 py-1">Currently Unavailable</Badge>
-                )}
-                {item.is_vegan && (
-                  <Badge variant="outline" className="text-sm px-3 py-1 bg-emerald-100 text-emerald-800 border-emerald-200">
-                    🌱 Vegan
-                  </Badge>
-                )}
-                {item.is_vegetarian && (
-                  <Badge variant="outline" className="text-sm px-3 py-1 bg-lime-100 text-lime-800 border-lime-200">
-                    🥚 Vegetarian
-                  </Badge>
-                )}
-                {item.is_spicy && (
-                  <Badge variant="outline" className="text-sm px-3 py-1 bg-red-100 text-red-800 border-red-200">
-                    🌶️ Spicy
-                  </Badge>
-                )}
-                {item.is_new && (
-                  <Badge variant="outline" className="text-sm px-3 py-1 bg-blue-100 text-blue-800 border-blue-200">
-                    ✨ New
-                  </Badge>
-                )}
-                {item.is_limited_time && (
-                  <Badge variant="outline" className="text-sm px-3 py-1 bg-yellow-100 text-yellow-800 border-yellow-200">
-                    ⏳ Limited Time
-                  </Badge>
-                )}
-                {item.is_most_popular && (
-                  <Badge variant="outline" className="text-sm px-3 py-1 bg-purple-100 text-purple-800 border-purple-200">
-                    🔥 Most Popular
-                  </Badge>
-                )}
-                {item.is_special && (
-                  <Badge variant="outline" className="text-sm px-3 py-1 bg-green-100 text-green-800 border-green-200">
-                    ⭐ Special
-                  </Badge>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </DrawerContent>
-    </Drawer>
-  )
-}
-
 export function MenuDetails({ menu, categories, activeFilters }: MenuDetailsProps) {
   const [selectedCategory, setSelectedCategory] = useState<MenuCategory | null>(null);
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
   // Minimum swipe distance in pixels
@@ -176,29 +66,50 @@ export function MenuDetails({ menu, categories, activeFilters }: MenuDetailsProp
     };
   }, [isSidebarOpen]);
 
+  useEffect(() => {
+    // Reset image index when selecting a new item
+    setCurrentImageIndex(0);
+  }, [selectedItem]);
+
   const closeSidebar = () => {
     setIsSidebarOpen(false);
     setTimeout(() => setSelectedCategory(null), 300); // Wait for animation to complete
   };
 
-  const onTouchStart = (e: React.TouchEvent) => {
+  const onTouchStart = (e: React.TouchEvent, forImage?: boolean) => {
+    if (!forImage && !isSidebarOpen) return;
+    if (forImage) {
+      e.stopPropagation();
+    }
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
   };
 
-  const onTouchMove = (e: React.TouchEvent) => {
+  const onTouchMove = (e: React.TouchEvent, forImage?: boolean) => {
+    if (!forImage && !isSidebarOpen) return;
+    if (forImage) {
+      e.stopPropagation();
+    }
     setTouchEnd(e.targetTouches[0].clientX);
   };
 
-  const onTouchEnd = () => {
+  const onTouchEnd = (e: React.TouchEvent | null, forImage?: boolean, imageUrls?: string[]) => {
     if (!touchStart || !touchEnd) return;
+    if (forImage && e) {
+      e.stopPropagation();
+    }
     
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
     
-    // If swiping right when sidebar is open, close it
-    if (isRightSwipe && isSidebarOpen) {
+    if (forImage && imageUrls) {
+      if (isLeftSwipe && currentImageIndex < imageUrls.length - 1) {
+        setCurrentImageIndex(prev => prev + 1);
+      } else if (isRightSwipe && currentImageIndex > 0) {
+        setCurrentImageIndex(prev => prev - 1);
+      }
+    } else if (isRightSwipe && isSidebarOpen) {
       closeSidebar();
     }
   };
@@ -245,7 +156,7 @@ export function MenuDetails({ menu, categories, activeFilters }: MenuDetailsProp
   };
 
   return (
-    <div className="relative">
+    <div>
       {(menu.description || !isAvailable || availabilityText) && (
         <div className="text-center space-y-3">
           {!isAvailable && (
@@ -259,13 +170,6 @@ export function MenuDetails({ menu, categories, activeFilters }: MenuDetailsProp
             </p>
           )}
         </div>
-      )}
-      {selectedItem && (
-        <MenuItemDialog
-          item={selectedItem}
-          open={!!selectedItem}
-          onOpenChange={(open) => !open && setSelectedItem(null)}
-        />
       )}
       <div className={cn(
         "max-w-2xl mx-auto space-y-4 pb-32",
@@ -315,7 +219,7 @@ export function MenuDetails({ menu, categories, activeFilters }: MenuDetailsProp
         ref={sidebarRef}
         className={cn(
           "fixed top-[16px] right-0 h-screen bg-background border-l transform transition-transform duration-300 ease-in-out overflow-hidden z-50",
-          "w-[calc(100%-16px)] lg:w-[540px] rounded-tl-3xl", // Leave 16px gap on mobile
+          "w-[calc(100%-16px)] [@media(min-width:520px)]:w-[400px] lg:w-[540px] rounded-tl-3xl", 
           isSidebarOpen ? "translate-x-0" : "translate-x-full"
         )}
         onTouchStart={onTouchStart}
@@ -344,13 +248,33 @@ export function MenuDetails({ menu, categories, activeFilters }: MenuDetailsProp
                 >
                   {item.image_urls?.[0] && (
                     <div className="w-full mb-4">
-                      <div className="relative aspect-[16/10] w-full overflow-hidden rounded-lg">
+                      <div 
+                        className="relative aspect-[16/10] w-full overflow-hidden rounded-lg"
+                        onTouchStart={(e) => onTouchStart(e, true)}
+                        onTouchMove={(e) => onTouchMove(e, true)}
+                        onTouchEnd={(e) => onTouchEnd(e, true, item.image_urls)}
+                      >
                         <Image
-                          src={item.image_urls[0]}
+                          src={item.image_urls[currentImageIndex] || item.image_urls[0]}
                           alt={item.name}
                           fill
                           className="object-cover"
                         />
+                        {item.image_urls.length > 1 && (
+                          <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-1">
+                            {item.image_urls.map((_, index) => (
+                              <div
+                                key={index}
+                                className={cn(
+                                  "w-1.5 h-1.5 rounded-full",
+                                  index === currentImageIndex
+                                    ? "bg-white"
+                                    : "bg-white/50"
+                                )}
+                              />
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}

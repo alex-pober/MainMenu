@@ -87,3 +87,21 @@
     @apply bg-background text-foreground;
   }
 }
+
+[data-vaul-drawer-wrapper] {
+  position: absolute !important;
+  z-index: 100;
+}
+
+[data-vaul-drawer-overlay] {
+  position: absolute !important;
+}
+
+[data-vaul-drawer-content] {
+  position: absolute !important;
+  max-width: 343px !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  left: 0 !important;
+  right: 0 !important;
+}

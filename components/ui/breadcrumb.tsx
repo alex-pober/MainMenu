@@ -38,12 +38,12 @@ export function Breadcrumbs({
               {segment.href ? (
                 <a
                   href={segment.href}
-                  className="hover:text-foreground transition-colors"
+                  className="hover:text-foreground transition-colors cursor-pointer"
                 >
                   {segment.title}
                 </a>
               ) : (
-                <span className={cn(isLast && "text-foreground font-medium")}>
+                <span className={cn("cursor-default select-none", isLast && "text-foreground font-medium")}>
                   {segment.title}
                 </span>
               )}

@@ -79,7 +79,7 @@ export function ItemFilter({ onFilterChange, availableLabels }: ItemFilterProps)
         )}
         onScroll={() => setHasScrolled(true)}
       >
-        <div className="flex gap-1.5 pb-2">
+        <div className="flex gap-1.5 pb-2 justify-center">
           {availableLabels.map(label => {
             const config = LABEL_CONFIG[label as keyof typeof LABEL_CONFIG];
             if (!config) return null;

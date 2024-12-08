@@ -42,11 +42,25 @@ export function CreateCategoryDialog({
         return;
       }
 
+      // First, get the current highest sort_order
+      const { data: existingCategories, error: fetchError } = await supabase
+        .from('menu_categories')
+        .select('sort_order')
+        .eq('menu_id', menuId)
+        .order('sort_order', { ascending: false })
+        .limit(1);
+
+      if (fetchError) throw fetchError;
+
+      const nextSortOrder = existingCategories && existingCategories.length > 0 
+        ? (existingCategories[0].sort_order + 1) 
+        : 0;
+
       const formData: CreateMenuCategoryInput = {
         menu_id: menuId,
         name: (e.target as any).name.value,
         description: (e.target as any).description.value,
-        sort_order: 0
+        sort_order: nextSortOrder
       };
 
       // @ts-ignore

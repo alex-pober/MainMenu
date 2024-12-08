@@ -4,12 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { 
-  LayoutDashboard, 
   Menu, 
-  Settings, 
-  BarChart2, 
-  Clock,
-  Users,
   ChevronLeft,
   ChevronRight,
   ExternalLink,
@@ -24,11 +19,6 @@ import { useSupabase } from '@/hooks/use-supabase';
 
 const sidebarLinks = [
   {
-    title: 'Overview',
-    href: '/dashboard',
-    icon: LayoutDashboard
-  },
-  {
     title: 'Menus',
     href: '/dashboard/menus',
     icon: Menu
@@ -38,26 +28,6 @@ const sidebarLinks = [
     href: '/dashboard/restaurant-info',
     icon: Info
   },
-  {
-    title: 'Orders',
-    href: '/dashboard/orders',
-    icon: BarChart2
-  },
-  {
-    title: 'Reservations',
-    href: '/dashboard/reservations',
-    icon: Clock
-  },
-  {
-    title: 'Staff',
-    href: '/dashboard/staff',
-    icon: Users
-  },
-  {
-    title: 'Settings',
-    href: '/dashboard/settings',
-    icon: Settings
-  }
 ];
 
 export default function DashboardLayout({
@@ -216,7 +186,9 @@ export default function DashboardLayout({
       )}>
         <main className="flex-1 overflow-auto p-4 pt-16 lg:pt-4"> {/* Added padding-top for mobile menu button */}
           <div className="bg-background rounded-lg p-4">
-            {children}
+            <div className="flex-1 space-y-4 p-0 pt-6 h-full overflow-auto">
+              {children}
+            </div>
           </div>
         </main>
       </div>
