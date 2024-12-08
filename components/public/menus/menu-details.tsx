@@ -219,7 +219,7 @@ export function MenuDetails({ menu, categories, activeFilters }: MenuDetailsProp
         ref={sidebarRef}
         className={cn(
           "fixed top-[16px] right-0 h-screen bg-background border-l transform transition-transform duration-300 ease-in-out overflow-hidden z-50",
-          "w-[calc(100%-16px)] [@media(min-width:520px)]:w-[400px] lg:w-[540px] rounded-tl-3xl", 
+          "w-[calc(100%-16px)] [@media(min-width:520px)]:w-[500px] lg:w-[540px] rounded-tl-3xl", 
           isSidebarOpen ? "translate-x-0" : "translate-x-full"
         )}
         onTouchStart={onTouchStart}

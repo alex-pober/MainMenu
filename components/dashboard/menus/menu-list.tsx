@@ -259,10 +259,35 @@ export function MenuList({ searchQuery }: MenuListProps) {
                 </CardContent>
               </Card>
             ) : menus
-              .filter((menu) =>
-                menu.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                menu.description.toLowerCase().includes(searchQuery.toLowerCase())
-              )
+              .filter((menu) => {
+                const searchLower = searchQuery.toLowerCase();
+
+                // Search in menu name and description
+                if (menu.name.toLowerCase().includes(searchLower) ||
+                    (menu.description || '').toLowerCase().includes(searchLower)) {
+                  return true;
+                }
+                
+                // Search in categories and their items
+                const hasMatch = menu.menu_categories?.some(category => {
+
+                  // Search in category name and description
+                  if (category.name.toLowerCase().includes(searchLower) ||
+                      (category.description || '').toLowerCase().includes(searchLower)) {
+                    return true;
+                  }
+                  
+                  // Search in menu items
+                  const itemMatch = category.menu_items?.some(item => {
+                    return item.name.toLowerCase().includes(searchLower) ||
+                           (item.description || '').toLowerCase().includes(searchLower);
+                  });
+                  
+                  return itemMatch;
+                });
+                
+                return hasMatch || false;
+              })
               .map((menu, index) => (
                 <Draggable key={menu.id} draggableId={menu.id} index={index}>
                   {(provided) => (

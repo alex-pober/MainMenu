@@ -191,9 +191,17 @@ export function MenuCategoryList({ categories, setCategories, searchQuery }: Men
     setExpandedCategories(newExpandedState);
   };
 
-  const filteredCategories = categories.filter(category =>
-    category.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredCategories = categories.filter(category => {
+    const categoryMatch = category.name.toLowerCase().includes(searchQuery.toLowerCase());
+    if (categoryMatch) return true;
+    
+    // Search through items in this category
+    const items = categoryItems[category.id] || [];
+    return items.some(item => 
+      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (item.description || '').toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  });
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>

@@ -41,7 +41,10 @@ export function MenuBreadcrumbs() {
   ];
 
   if (params.id && menu) {
-    segments.push({ title: menu.name });
+    segments.push({
+      title: menu.name,
+      href: ''
+    });
   }
 
   return <Breadcrumbs segments={segments} className="mb-6" />;
