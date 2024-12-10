@@ -148,7 +148,7 @@ export function MenuTabs({ userId }: MenuTabsProps) {
 
   return (
     <Tabs value={activeMenu || undefined} onValueChange={handleMenuChange} className="w-full max-w-5xl mx-auto">
-      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75">
+      <div className="sticky top-0 z-40 backdrop-blur">
         <div className="w-full max-w-2xl mx-auto">
           <ScrollArea className="w-full">
             <TabsList className="inline-flex h-10 items-center justify-center rounded-full bg-muted p-1 w-full">

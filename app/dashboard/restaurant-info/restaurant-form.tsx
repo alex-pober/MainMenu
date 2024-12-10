@@ -466,7 +466,7 @@ export function RestaurantForm() {
           </div>
         </div>
 
-        <div className="space-y-4">
+        {/* <div className="space-y-4">
           <h3 className="text-lg font-medium">Business Hours</h3>
           <FormField
             control={form.control}
@@ -491,27 +491,27 @@ export function RestaurantForm() {
               </FormItem>
             )}
           />
-        </div>
+        </div> */}
 
-        <div className="flex items-center justify-end gap-4">
-          <Button
+        <div className="flex justify-end">
+          <Button 
             type="submit"
-            disabled={isLoading || !form.formState.isDirty}
-            className="min-w-[100px]"
+            disabled={isLoading || !form.formState.isDirty} 
+            className="w-full sm:w-auto"
           >
             {isLoading ? (
               <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Saving...
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving Changes...
               </>
             ) : form.formState.isDirty ? (
               <>
-                <Save className="w-4 h-4 mr-2" />
+                <Save className="mr-2 h-4 w-4" />
                 Save Changes
               </>
             ) : (
               <>
-                <Check className="w-4 h-4 mr-2" />
+                <Check className="mr-2 h-4 w-4" />
                 Saved
               </>
             )}

@@ -157,10 +157,13 @@ export default function DashboardLayout({
         <div className="p-2">
           <Button
             variant="default"
-            className="w-full justify-start gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
+            className={cn(
+              "w-full  bg-primary hover:bg-primary/90 text-primary-foreground",
+              collapsed ? "justify-center" : "gap-3"
+            )}
             onClick={() => window.open(`/menus/${user.id}`, '_blank')}
           >
-            <ExternalLink size={20} />
+            <ExternalLink className="h-5 w-5 min-w-[20px]" />
             <span className={cn(
               "transition-all duration-300",
               collapsed ? "opacity-0 w-0" : "opacity-100"
@@ -170,20 +173,21 @@ export default function DashboardLayout({
           </Button>
         </div>
 
-        <nav className="flex-1 p-2 space-y-1">
+        <nav className="flex flex-col gap-2 m-2">
           {sidebarLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               onClick={() => setIsMobileMenuOpen(false)} // Close mobile menu when clicking a link
               className={cn(
-                "flex items-center gap-2 px-3 py-2 rounded-md transition-colors",
+                "flex items-center px-3 py-2 rounded-md transition-colors",
                 (pathname === link.href || (link.href !== '/dashboard' && pathname.startsWith(link.href)))
                   ? "bg-white shadow-sm text-secondary-foreground hover:bg-white/90"
-                  : "hover:bg-secondary/50 hover:text-secondary-foreground text-muted-foreground"
+                  : "hover:bg-secondary/50 hover:text-secondary-foreground text-muted-foreground",
+                collapsed ? "justify-center" : "gap-3"
               )}
             >
-              <link.icon size={20} />
+              <link.icon className="h-5 w-5 min-w-[20px]" />
               <span className={cn(
                 "transition-all duration-300",
                 collapsed ? "opacity-0 w-0" : "opacity-100"
@@ -214,12 +218,12 @@ export default function DashboardLayout({
 
       {/* Main Content */}
       <div className={cn(
-        "flex-1 flex flex-col overflow-hidden bg-[#f5f5f5] w-full",
+        "flex-1 flex flex-col bg-[#f5f5f5] w-full overflow-auto",
         collapsed ? "lg:ml-[60px]" : "lg:ml-[240px]" // Add margin-left equal to sidebar width
       )}>
-        <main className="flex-1 overflow-auto p-4 pt-16 lg:pt-4"> {/* Added padding-top for mobile menu button */}
-          <div className="bg-background rounded-lg p-4">
-            <div className="flex-1 space-y-4 p-0 pt-6 h-full overflow-auto">
+        <main className="flex-1 min-h-[calc(100-2rem)] pt-16 lg:pt-4 p-4"> 
+          <div className="bg-background rounded-lg h-full">
+            <div className="p-0 sm:p-6">
               {children}
             </div>
           </div>
