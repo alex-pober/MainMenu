@@ -37,7 +37,7 @@ export function MenuCategories({ categories, menuId }: MenuCategoriesProps) {
   }, []);
 
   return (
-    <nav className="sticky top-0 z-10 -mx-4 px-4 py-4 bg-background mb-8">
+    <nav className="sticky top-[72px] z-50 -mx-4 px-4 py-4 bg-background mb-8">
       <div className="space-y-2 max-w-2xl mx-auto">
         {categories.map((category) => (
           <Button
@@ -45,12 +45,19 @@ export function MenuCategories({ categories, menuId }: MenuCategoriesProps) {
             variant="ghost"
             size="lg"
             className={cn(
-              "w-full flex justify-between items-center px-4 py-3 rounded-lg hover:bg-accent",
+              "w-full flex justify-between items-center px-4 py-3 rounded-3xl hover:bg-accent shadow-[rgba(25, 4, 69, 0.05) 0px 3px 7px -1px]",
               activeCategory === category.id && "bg-accent"
             )}
             onClick={() => {
               const element = document.getElementById(`category-${category.id}`);
-              element?.scrollIntoView({ behavior: 'smooth' });
+              const headerOffset = 120; // Account for sticky header height
+              const elementPosition = element?.getBoundingClientRect().top ?? 0;
+              const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+              
+              window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+              });
             }}
           >
             <span className="text-lg">{category.name}</span>

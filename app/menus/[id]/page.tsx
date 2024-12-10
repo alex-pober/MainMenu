@@ -183,7 +183,7 @@ export default function MenuPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#fdfdff]" suppressHydrationWarning>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -200,29 +200,30 @@ export default function MenuPage() {
                   transition={{ duration: 0.8, ease: "easeOut" }}
                   className="relative w-full max-w-[430px] sm:max-w-[430px] mx-auto px-2"
                 >
-                  <Image 
-                    src={user.banner_image_url} 
-                    alt={user.name}
-                    layout="responsive"
-                    width={430}
-                    height={200}
-                    objectFit="contain"
-                    className="w-full h-auto"
-                  />
+                  <div className="relative aspect-[430/200]">
+                    <Image 
+                      src={user.banner_image_url} 
+                      alt={user.name}
+                      fill
+                      sizes="(max-width: 430px) 100vw, 430px"
+                      priority
+                      className="object-contain w-full h-full"
+                    />
+                  </div>
                 </motion.div>
               </div>
             </div>
           ) : (
-            <div className="relative py-16 sm:py-24 text-center w-full flex-col items-center justify-center overflow-hidden rounded-lg  bg-background md:shadow-xl">
-                <DotPattern 
-                  className={cn(
-                    "[mask-image:radial-gradient(300px_80px_ellipse_at_center,white,transparent)]"
-                  )}
-                />
+            <div className="relative py-16 sm:py-24 text-center w-full flex-col items-center justify-center overflow-hidden rounded-lg bg-background md:shadow-xl">
+              <DotPattern 
+                className={cn(
+                  "[mask-image:radial-gradient(300px_80px_ellipse_at_center,white,transparent)]"
+                )}
+              />
               <motion.h1 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
                 className="relative text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-gray-900"
               >
                 {user?.name}

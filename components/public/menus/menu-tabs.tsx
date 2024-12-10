@@ -116,6 +116,19 @@ export function MenuTabs({ userId }: MenuTabsProps) {
     fetchMenus();
   }, [userId, supabase]);
 
+  const handleMenuChange = (value: string) => {
+    setActiveMenu(value);
+    const menuContainer = document.querySelector('.menu-content-container');
+    if (menuContainer) {
+      const headerOffset = 120;
+      window.scrollTo({
+        //@ts-ignore
+        top: menuContainer.offsetTop - headerOffset,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -134,9 +147,9 @@ export function MenuTabs({ userId }: MenuTabsProps) {
   }
 
   return (
-    <Tabs value={activeMenu || undefined} onValueChange={setActiveMenu} className="w-full max-w-5xl mx-auto px-4">
-      <div className="flex flex-col items-center space-y-4 mb-2">
-        <div className="w-full max-w-2xl">
+    <Tabs value={activeMenu || undefined} onValueChange={handleMenuChange} className="w-full max-w-5xl mx-auto">
+      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75">
+        <div className="w-full max-w-2xl mx-auto">
           <ScrollArea className="w-full">
             <TabsList className="inline-flex h-10 items-center justify-center rounded-full bg-muted p-1 w-full">
               {menus.map((menu) => (
@@ -154,25 +167,32 @@ export function MenuTabs({ userId }: MenuTabsProps) {
         </div>
 
         {menus.map((menu) => (
-          <TabsContent key={menu.id} value={menu.id} className="w-full max-w-2xl">
+          <TabsContent key={menu.id} value={menu.id} className="mt-0 py-2 w-full max-w-2xl mx-auto">
             {menu.description && (
-              <p className="text-sm text-muted-foreground text-center">{menu.description}</p>
+              <p className="text-sm text-muted-foreground text-center p-1">
+                {menu.description}
+              </p>
             )}
           </TabsContent>
         ))}
 
         {availableLabels.length > 0 && (
-          <div className="w-full border-t border-b py-3 bg-background/50 backdrop-blur supports-[backdrop-filter]:bg-background/50">
-            <ItemFilter availableLabels={availableLabels} onFilterChange={setActiveFilters} />
+          <div className="relative w-full border-t border-b py-3">
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-transparent backdrop-blur supports-[backdrop-filter]:bg-gradient-to-b supports-[backdrop-filter]:from-transparent supports-[backdrop-filter]:via-background/50 supports-[backdrop-filter]:to-transparent" />
+            <div className="relative">
+              <ItemFilter availableLabels={availableLabels} onFilterChange={setActiveFilters} />
+            </div>
           </div>
         )}
       </div>
 
-      {menus.map((menu) => (
-        <TabsContent key={menu.id} value={menu.id} className="mt-0 outline-none ring-0">
-          <MenuDetails menu={menu} categories={categories[menu.id] || []} activeFilters={activeFilters} />
-        </TabsContent>
-      ))}
+      <div className="menu-content-container">
+        {menus.map((menu) => (
+          <TabsContent key={menu.id} value={menu.id} className="m-0 outline-none ring-0">
+            <MenuDetails menu={menu} categories={categories[menu.id] || []} activeFilters={activeFilters} />
+          </TabsContent>
+        ))}
+      </div>
     </Tabs>
   );
 }

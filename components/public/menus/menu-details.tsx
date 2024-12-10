@@ -38,6 +38,7 @@ export function MenuDetails({ menu, categories, activeFilters }: MenuDetailsProp
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const sidebarRef = useRef<HTMLDivElement>(null);
+  const scrollPositionRef = useRef(0);
 
   // Minimum swipe distance in pixels
   const minSwipeDistance = 50;
@@ -50,19 +51,27 @@ export function MenuDetails({ menu, categories, activeFilters }: MenuDetailsProp
 
   useEffect(() => {
     if (isSidebarOpen) {
+      scrollPositionRef.current = window.scrollY;
       document.body.style.overflow = 'hidden';
       document.body.style.position = 'fixed';
       document.body.style.width = '100%';
+      document.body.style.top = `-${scrollPositionRef.current}px`;
     } else {
       document.body.style.overflow = '';
       document.body.style.position = '';
       document.body.style.width = '';
+      document.body.style.top = '';
+      window.scrollTo({
+        top: scrollPositionRef.current,
+        behavior: 'instant'
+      });
     }
 
     return () => {
       document.body.style.overflow = '';
       document.body.style.position = '';
       document.body.style.width = '';
+      document.body.style.top = '';
     };
   }, [isSidebarOpen]);
 
@@ -172,9 +181,10 @@ export function MenuDetails({ menu, categories, activeFilters }: MenuDetailsProp
         </div>
       )}
       <div className={cn(
-        "max-w-2xl mx-auto space-y-4 pb-32",
+        "max-w-2xl mx-auto space-y-3 pb-32",
         isSidebarOpen && "lg:opacity-50 pointer-events-none transition-opacity duration-300"
       )}>
+        {/* THIS IS THE MENU CATEGORIES LIST */}
         {categories.map((category) => {
           const filteredItems = filterItems(category.menu_items);
           if (activeFilters.length > 0 && filteredItems.length === 0) return null;
@@ -183,10 +193,13 @@ export function MenuDetails({ menu, categories, activeFilters }: MenuDetailsProp
             <Card
               key={category.id}
               className={cn(
-                "cursor-pointer transition-colors hover:bg-muted/50",
+                "cursor-pointer transition-colors hover:bg-muted/50 rounded-xl",
                 selectedCategory?.id === category.id && "bg-muted"
               )}
-              onClick={() => setSelectedCategory(category)}
+              onClick={(e) => {
+                e.preventDefault();
+                setSelectedCategory(category);
+              }}
             >
               <CardContent className="p-6">
                 <div className="flex justify-between items-center gap-4">
