@@ -11,11 +11,14 @@ import {
   LogOut,
   Info,
   X,
-  Loader2
+  Loader2,
+  User,
+  QrCode
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useSupabase } from '@/hooks/use-supabase';
+import { useToast } from '@/hooks/use-toast';
 
 const sidebarLinks = [
   {
@@ -27,6 +30,16 @@ const sidebarLinks = [
     title: 'Restaurant Info',
     href: '/dashboard/restaurant-info',
     icon: Info
+  },
+  {
+    title: 'QR Code',
+    href: '/dashboard/qr-code',
+    icon: QrCode
+  },
+  {
+    title: 'Account',
+    href: '/dashboard/account',
+    icon: User
   },
 ];
 
@@ -40,6 +53,7 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const router = useRouter();
   const { client: supabase, user, isLoading } = useSupabase();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!isLoading) {
@@ -65,8 +79,20 @@ export default function DashboardLayout({
 
   const handleSignOut = async () => {
     if (!supabase) return;
-    await supabase.auth.signOut();
-    router.push('/auth');
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+
+      // Redirect to auth page
+      router.push('/auth');
+    } catch (error: any) {
+      console.error('Error signing out:', error.message);
+      toast({
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -95,12 +121,19 @@ export default function DashboardLayout({
       )}>
         {/* Sidebar Header */}
         <div className="flex items-center justify-between p-4">
-          <h1 className={cn(
-            "font-bold transition-all duration-300",
-            collapsed ? "opacity-0 w-0" : "opacity-100"
+          <div className={cn(
+            "transition-all duration-300",
+            collapsed ? "w-0" : "w-full"
           )}>
-            MainMenu
-          </h1>
+            <img 
+              src="/images/main-menu-logo.svg" 
+              alt="Main Menu Logo" 
+              className={cn(
+                "h-8 w-auto transition-all duration-300",
+                collapsed ? "opacity-0" : "opacity-100"
+              )}
+            />
+          </div>
           <Button
             variant="ghost"
             size="icon"

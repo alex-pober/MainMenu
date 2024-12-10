@@ -144,13 +144,7 @@ export function MenuList({ searchQuery }: MenuListProps) {
 
       // Check if we have the required client and user
       if (!supabase || !user) {
-        console.error('No session found');
-        toast({
-          title: "Authentication Error",
-          description: "Please sign in to view your menus",
-          variant: "destructive",
-        });
-        router.push('/auth');
+        router.replace('/auth');
         return;
       }
 
