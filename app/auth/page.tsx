@@ -65,7 +65,6 @@ export default function AuthPage() {
         router.replace('/dashboard');
       }
     } catch (error: any) {
-      console.error('Authentication error:', error);
       toast({
         title: "Error",
         description: error?.message || "An error occurred during authentication",
