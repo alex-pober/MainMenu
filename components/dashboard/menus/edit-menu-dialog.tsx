@@ -109,7 +109,6 @@ export function EditMenuDialog({ open, onOpenChange, menu }: EditMenuDialogProps
                 placeholder="Enter menu description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                required
               />
             </div>
             <div className="flex items-center justify-between">

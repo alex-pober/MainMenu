@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { 
   Menu, 
   ChevronLeft,
@@ -97,14 +98,6 @@ export default function DashboardLayout({
 
   return (
     <div className="flex h-screen overflow-hidden">
-      {/* Mobile Menu Button */}
-      <button
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-md bg-background shadow-sm"
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-      >
-        <Menu className="h-5 w-5" />
-      </button>
-
       {/* Overlay for mobile */}
       {isMobileMenuOpen && (
         <div 
@@ -125,13 +118,16 @@ export default function DashboardLayout({
             "transition-all duration-300",
             collapsed ? "w-0" : "w-full"
           )}>
-            <img 
+            <Image 
               src="/images/main-menu-logo.svg" 
               alt="Main Menu Logo" 
+              width={96}
+              height={32}
               className={cn(
                 "h-8 w-auto transition-all duration-300",
                 collapsed ? "opacity-0" : "opacity-100"
               )}
+              priority
             />
           </div>
           <Button
@@ -221,9 +217,29 @@ export default function DashboardLayout({
         "flex-1 flex flex-col bg-[#f5f5f5] w-full overflow-auto",
         collapsed ? "lg:ml-[60px]" : "lg:ml-[240px]" // Add margin-left equal to sidebar width
       )}>
-        <main className="flex-1 min-h-[calc(100-2rem)] pt-16 lg:pt-4 p-4"> 
+        <main className="flex-1 min-h-[calc(100-2rem)] lg:pt-4 p-4">
+          {/* Mobile Header */}
+          <div className="lg:hidden relative mb-4">
+            <button
+              className="absolute left-0 top-0 p-2 rounded-md bg-background shadow-sm"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <div className="flex justify-center">
+              <Image 
+                src="/images/main-menu-logo.svg" 
+                alt="Main Menu Logo" 
+                width={96}
+                height={32}
+                className="h-8 w-auto"
+                priority
+              />
+            </div>
+          </div>
+
           <div className="bg-background rounded-lg h-full">
-            <div className="p-0 sm:p-6">
+            <div className="p-2 sm:p-6">
               {children}
             </div>
           </div>

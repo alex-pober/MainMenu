@@ -22,7 +22,7 @@ export function CreateMenuDialog({ open, onOpenChange }: CreateMenuDialogProps) 
   const [formData, setFormData] = useState<CreateMenuInput>({
     name: '',
     description: '',
-    status: 'draft',
+    status: 'active',
     is_always_available: true,
     available_start_time: '00:00',
     available_end_time: '23:59'

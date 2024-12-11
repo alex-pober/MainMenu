@@ -22,7 +22,7 @@ export function Breadcrumbs({
     <nav
       aria-label="breadcrumbs"
       className={cn(
-        "flex items-center text-sm text-muted-foreground",
+        "flex items-center text-sm text-muted-foreground m-3",
         className
       )}
       {...props}
