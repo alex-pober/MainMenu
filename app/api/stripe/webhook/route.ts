@@ -20,11 +20,20 @@ export async function POST(req: Request) {
 
   try {
     if (!sig || !webhookSecret) {
+      console.error('Missing webhook requirements:', {
+        hasSignature: !!sig,
+        hasSecret: !!webhookSecret
+      })
       return new NextResponse('Webhook Error: Missing stripe-signature or webhook secret', { status: 400 })
     }
     
     event = stripe.webhooks.constructEvent(body, sig, webhookSecret)
   } catch (err: any) {
+    console.error('Webhook signature verification failed:', {
+      error: err.message,
+      signature: sig?.slice(0, 20) + '...',  // Only log part of the signature
+      bodyPreview: body.slice(0, 50) + '...'  // Only log start of body
+    })
     return new NextResponse(`Webhook Error: ${err.message}`, { status: 400 })
   }
 
