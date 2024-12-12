@@ -72,17 +72,7 @@ export async function POST(req: Request) {
       switch (event.type) {
         case 'customer.subscription.created':
         case 'customer.subscription.updated': {
-          const subscription = event.data.object as Stripe.Subscription
-          await supabase
-            .from('restaurant_profiles')
-            .update({
-              subscription_status: subscription.status,
-              subscription_id: subscription.id,
-              subscription_price_id: subscription.items.data[0].price.id,
-              subscription_current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-              subscription_cancel_at_period_end: subscription.cancel_at_period_end,
-            })
-            .eq('stripe_customer_id', subscription.customer as string)
+          // We don't need to update anything here since we only track stripe_customer_id
           break
         }
 
@@ -91,9 +81,7 @@ export async function POST(req: Request) {
           await supabase
             .from('restaurant_profiles')
             .update({
-              subscription_status: 'canceled',
-              subscription_cancel_at_period_end: false,
-              subscription_current_period_end: null,
+              stripe_customer_id: null  // Remove the stripe_customer_id when subscription is deleted
             })
             .eq('stripe_customer_id', subscription.customer as string)
           break
