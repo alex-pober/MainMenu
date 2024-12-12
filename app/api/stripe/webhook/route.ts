@@ -4,6 +4,13 @@ import { stripe } from '@/lib/stripe'
 import { createServerClient } from '@supabase/ssr'
 import Stripe from 'stripe'
 
+// This is required to disable body parsing for the webhook route
+export const config = {
+  api: {
+    bodyParser: false
+  }
+}
+
 const relevantEvents = new Set([
   'checkout.session.completed',
   'customer.subscription.updated',
@@ -13,8 +20,18 @@ const relevantEvents = new Set([
 
 export async function POST(req: Request) {
   const body = await req.text()
-  const sig = (await headers()).get('stripe-signature')
+  // @ts-ignore
+  const sig = headers().get('stripe-signature')
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+
+  console.log('Webhook request received:', {
+    hasBody: !!body,
+    bodyLength: body.length,
+    hasSignature: !!sig,
+    hasSecret: !!webhookSecret,
+    method: req.method,
+    contentType: req.headers.get('content-type')
+  })
 
   let event: Stripe.Event
 
