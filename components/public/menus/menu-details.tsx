@@ -256,7 +256,7 @@ export function MenuDetails({ menu, categories, activeFilters }: MenuDetailsProp
               {selectedCategory && filterItems(selectedCategory.menu_items).map((item) => (
                 <div
                   key={item.id}
-                  className="flex flex-col cursor-pointer hover:bg-muted/50 py-6 first:pt-0 last:pb-0 rounded-lg transition-colors"
+                  className="flex flex-col py-5 first:pt-0 last:pb-0 transition-colors"
                   onClick={() => setSelectedItem(item)}
                 >
                   {item.image_urls?.[0] && (
@@ -291,7 +291,7 @@ export function MenuDetails({ menu, categories, activeFilters }: MenuDetailsProp
                       </div>
                     </div>
                   )}
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <div className="flex justify-between items-start gap-2">
                       <h5 className="text-lg font-medium">{item.name}</h5>
                       <div className="text-base font-medium whitespace-nowrap">

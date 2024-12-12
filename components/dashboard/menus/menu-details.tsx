@@ -135,8 +135,8 @@ export function MenuDetails() {
   return (
     <div className="space-y-4">
       <div className="space-y-4">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 flex gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+          <div className="flex-1 flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <Label htmlFor="name">Menu Name</Label>
               <Input
@@ -154,7 +154,7 @@ export function MenuDetails() {
               />
             </div>
           </div>
-          <Button onClick={handleSave} disabled={isSaving}>
+          <Button onClick={handleSave} disabled={isSaving} className="w-full sm:w-auto">
             <Save className="mr-2 h-4 w-4" />
             {isSaving ? "Saving..." : "Save Changes"}
           </Button>
