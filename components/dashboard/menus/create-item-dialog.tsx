@@ -32,7 +32,7 @@ export function CreateItemDialog({
     category_id: categoryId,
     name: '',
     description: '',
-    price: 0,
+    price: null,
     is_available: true,
     is_spicy: false,
     is_new: false,
@@ -98,7 +98,7 @@ export function CreateItemDialog({
         category_id: categoryId,
         name: '',
         description: '',
-        price: 0,
+        price: null,
         is_available: true,
         is_spicy: false,
         is_new: false,
@@ -196,8 +196,8 @@ export function CreateItemDialog({
                   type="number"
                   min="0"
                   step="0.01"
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
+                  value={formData.price || ''}
+                  onChange={(e) => setFormData({ ...formData, price: e.target.value ? parseFloat(e.target.value) : null })}
                 />
               </div>
             </div>

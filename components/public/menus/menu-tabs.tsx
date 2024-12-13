@@ -187,7 +187,7 @@ export function MenuTabs({ userId }: MenuTabsProps) {
         ))}
 
         {availableLabels.length > 0 && (
-          <div className="relative w-full border-t border-b py-3">
+          <div className="relative w-full mb-2">
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-transparent backdrop-blur supports-[backdrop-filter]:bg-gradient-to-b supports-[backdrop-filter]:from-transparent supports-[backdrop-filter]:via-background/50 supports-[backdrop-filter]:to-transparent" />
             <div className="relative">
               <ItemFilter availableLabels={availableLabels} onFilterChange={setActiveFilters} />

@@ -157,8 +157,8 @@ export function EditItemDialog({
                   type="number"
                   min="0"
                   step="0.01"
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}    
+                  value={formData.price || ''}
+                  onChange={(e) => setFormData({ ...formData, price: e.target.value ? parseFloat(e.target.value) : null })}
                 />
               </div>
             </div>

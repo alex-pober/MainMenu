@@ -31,7 +31,7 @@ export interface MenuItem {
   category_id: string;
   name: string;
   description?: string;
-  price: number;
+  price: number | null;
   image_urls: string[];
   is_available: boolean;
   is_spicy: boolean;

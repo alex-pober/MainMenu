@@ -339,7 +339,7 @@ export function MenuItemList({ categoryId, searchQuery, items, onItemsChange }: 
                                 </div>
                               )}
                               <div>
-                                <div className="text-lg font-semibold order-1 md:order-none">${item.price.toFixed(2)}</div>
+                                <div className="text-lg font-semibold order-1 md:order-none">{item.price !== null ? `$${item.price.toFixed(2)}` : <></>}</div>
                                 <Badge variant={item.is_available ? "default" : "secondary"} className="order-2 md:order-none">
                                   {item.is_available ? 'Available' : 'Unavailable'}
                                 </Badge>
