@@ -34,51 +34,51 @@ export function MenuItemList({ categoryId, searchQuery, items, onItemsChange }: 
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const { toast } = useToast();
 
+  const fetchItems = async () => {
+    try {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      const { data, error } = await supabase
+        .from('menu_items')
+        .select(`
+          id,
+          category_id,
+          name,
+          description,
+          price,
+          image_urls,
+          is_available,
+          is_spicy,
+          is_new,
+          is_limited_time,
+          is_most_popular,
+          is_special,
+          is_vegan,
+          is_vegetarian,
+          sort_order,
+          created_at,
+          updated_at
+        `)
+        .eq('category_id', categoryId)
+        .order('sort_order');
+
+      if (error) throw error;
+      onItemsChange(data.map(item => ({
+        ...item,
+        image_urls: item.image_urls || []
+      })));
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   useEffect(() => {
-    const fetchItems = async () => {
-      try {
-        const supabase = createBrowserClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-        );
-        const { data, error } = await supabase
-          .from('menu_items')
-          .select(`
-            id,
-            category_id,
-            name,
-            description,
-            price,
-            image_urls,
-            is_available,
-            is_spicy,
-            is_new,
-            is_limited_time,
-            is_most_popular,
-            is_special,
-            is_vegan,
-            is_vegetarian,
-            sort_order,
-            created_at,
-            updated_at
-          `)
-          .eq('category_id', categoryId)
-          .order('sort_order');
-
-        if (error) throw error;
-        onItemsChange(data.map(item => ({
-          ...item,
-          image_urls: item.image_urls || []
-        })));
-      } catch (error: any) {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
-      }
-    };
-
     fetchItems();
   }, [categoryId]);
 
@@ -101,6 +101,8 @@ export function MenuItemList({ categoryId, searchQuery, items, onItemsChange }: 
         ...data,
         image_urls: data.image_urls || []
       } : i));
+      
+      fetchItems();
       
       toast({
         title: "Success",
@@ -150,7 +152,11 @@ export function MenuItemList({ categoryId, searchQuery, items, onItemsChange }: 
         )
       );
       
+      // Update local state
       onItemsChange(remainingItems);
+      
+      // Fetch fresh data
+      fetchItems();
       
       toast({
         title: "Success",
@@ -165,13 +171,11 @@ export function MenuItemList({ categoryId, searchQuery, items, onItemsChange }: 
     }
   };
 
-  const handleItemUpdated = (updatedItem: MenuItem) => {
-    onItemsChange(items.map(item => 
-      item.id === updatedItem.id ? {
-        ...updatedItem,
-        image_urls: updatedItem.image_urls || []
-      } : item
-    ));
+  const handleItemUpdated = async (updatedItem: MenuItem) => {
+    // Update local state
+    onItemsChange(items.map(i => i.id === updatedItem.id ? updatedItem : i));
+    // Fetch fresh data
+    await fetchItems();
   };
 
   const handleDragEnd = async (result: any) => {

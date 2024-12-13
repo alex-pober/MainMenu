@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +26,8 @@ export function CreateItemDialog({
   onItemCreated 
 }: CreateItemDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [imageFiles, setImageFiles] = useState<string[]>([]);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [formData, setFormData] = useState<Partial<MenuItem>>({
     category_id: categoryId,
     name: '',
@@ -111,6 +112,7 @@ export function CreateItemDialog({
         addons: []
       });
       setImageFiles([]);
+      setPreviewUrls([]);
       
       onOpenChange(false);
     } catch (error: any) {
@@ -126,14 +128,40 @@ export function CreateItemDialog({
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setImageFiles(Array.from(e.target.files).map(file => URL.createObjectURL(file)));
+    if (e.target.files && e.target.files.length > 0) {
+      const files = Array.from(e.target.files);
+      setImageFiles(files);
+      
+      // Create preview URLs for the new files
+      const urls = files.map(file => URL.createObjectURL(file));
+      setPreviewUrls(prevUrls => {
+        // Revoke old URLs to prevent memory leaks
+        prevUrls.forEach(url => URL.revokeObjectURL(url));
+        return urls;
+      });
     }
   };
 
-  const handleRemoveImage = (url: string) => {
-    setImageFiles(prev => prev.filter(image => image !== url));
+  const handleRemoveImage = (index: number) => {
+    setPreviewUrls(prevUrls => {
+      const newUrls = [...prevUrls];
+      URL.revokeObjectURL(newUrls[index]);
+      newUrls.splice(index, 1);
+      return newUrls;
+    });
+    setImageFiles(prevFiles => {
+      const newFilesList = [...prevFiles];
+      newFilesList.splice(index, 1);
+      return newFilesList;
+    });
   };
+
+  useEffect(() => {
+    // Cleanup URLs when component unmounts
+    return () => {
+      previewUrls.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, []);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -256,7 +284,7 @@ export function CreateItemDialog({
             <div className="space-y-2">
               <Label>Images</Label>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                <div className="relative aspect-square rounded-lg border-2 border-dashed border-muted-foreground/25 hover:border-muted-foreground/50 transition-colors">
+                <label className="relative aspect-square rounded-lg border-2 border-dashed border-muted-foreground/25 hover:border-muted-foreground/50 transition-colors cursor-pointer">
                   <input
                     type="file"
                     accept="image/*"
@@ -264,11 +292,12 @@ export function CreateItemDialog({
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     multiple
                   />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Plus className="w-6 h-6 text-muted-foreground/50" />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-muted-foreground">
+                    <Plus className="w-8 h-8" />
+                    <span className="text-xs">Upload Images</span>
                   </div>
-                </div>
-                {imageFiles.map((url, index) => (
+                </label>
+                {previewUrls.map((url, index) => (
                   <div key={url} className="relative aspect-square">
                     <img
                       src={url}
@@ -277,7 +306,7 @@ export function CreateItemDialog({
                     />
                     <button
                       type="button"
-                      onClick={() => handleRemoveImage(url)}
+                      onClick={() => handleRemoveImage(index)}
                       className="absolute -top-2 -right-2 p-1 bg-destructive text-destructive-foreground rounded-full shadow-lg hover:bg-destructive/90 transition-colors"
                     >
                       <X className="w-3 h-3" />

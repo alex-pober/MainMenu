@@ -175,11 +175,40 @@ export function MenuCategoryList({ categories, setCategories, searchQuery }: Men
     }));
   };
 
-  const handleItemsUpdated = (categoryId: string, items: MenuItem[]) => {
+  const handleItemsUpdated = async (categoryId: string, items: MenuItem[]) => {
+    // Update local state immediately for responsiveness
     setCategoryItems(prevItems => ({
       ...prevItems,
       [categoryId]: items.sort((a, b) => a.sort_order - b.sort_order)
     }));
+
+    // Fetch fresh data for all categories
+    try {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      const { data, error } = await supabase
+        .from('menu_items')
+        .select('*')
+        .in('category_id', categories.map(c => c.id))
+        .order('sort_order');
+
+      if (error) throw error;
+
+      // Group items by category
+      const itemsByCategory = data.reduce((acc: Record<string, MenuItem[]>, item) => {
+        if (!acc[item.category_id]) {
+          acc[item.category_id] = [];
+        }
+        acc[item.category_id].push(item);
+        return acc;
+      }, {});
+
+      setCategoryItems(itemsByCategory);
+    } catch (error: any) {
+      console.error('Error refreshing items:', error);
+    }
   };
 
   const handleExpandAll = () => {

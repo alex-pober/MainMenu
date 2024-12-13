@@ -10,7 +10,7 @@ const getSupabaseClient = () => {
   );
 };
 
-export async function uploadImages(imageFiles: string[]): Promise<string[]> {
+export async function uploadImages(imageFiles: File[]): Promise<string[]> {
   const supabase = getSupabaseClient();
   try {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -18,57 +18,27 @@ export async function uploadImages(imageFiles: string[]): Promise<string[]> {
       throw new Error('Authentication required');
     }
 
-    const uploadPromises = imageFiles.map(async (imageFile) => {
+    const uploadPromises = imageFiles.map(async (file) => {
       try {
-        // Check if the image data is valid
-        if (!imageFile || !imageFile.includes('base64,')) {
-          throw new Error('Invalid image data');
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+          throw new Error('Invalid file type. Only images are allowed.');
         }
 
-        // Get the mime type from the base64 string
-        const mimeType = imageFile.split(';')[0].split(':')[1];
-        if (!['image/jpeg', 'image/png', 'image/gif'].includes(mimeType)) {
-          throw new Error('Invalid image type. Only JPEG, PNG, and GIF are supported.');
-        }
-
-        // Convert base64 to blob
-        const base64Data = imageFile.split('base64,')[1];
-        
-        // Check file size before decoding (base64 is ~4/3 the size of binary)
-        const estimatedSize = (base64Data.length * 3) / 4;
-        if (estimatedSize > 10 * 1024 * 1024) { // 10MB limit
+        // Validate file size (10MB limit)
+        if (file.size > 10 * 1024 * 1024) {
           throw new Error('File size exceeds 10MB limit');
         }
 
-        // Decode base64
-        const byteCharacters = atob(base64Data);
-        const byteArrays = [];
-        const sliceSize = 512;
-        
-        for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-          const slice = byteCharacters.slice(offset, offset + sliceSize);
-          const byteNumbers = new Array(slice.length);
-          
-          for (let i = 0; i < slice.length; i++) {
-            byteNumbers[i] = slice.charCodeAt(i);
-          }
-          
-          const byteArray = new Uint8Array(byteNumbers);
-          byteArrays.push(byteArray);
-        }
-        
-        // Create blob with original mime type
-        const blob = new Blob(byteArrays, { type: mimeType });
-        const extension = mimeType.split('/')[1];
+        const extension = file.type.split('/')[1];
         const fileName = `${user.id}/${uuidv4()}.${extension}`;
-        const file = new File([blob], fileName, { type: mimeType });
 
         const { data, error: uploadError } = await supabase.storage
           .from(BUCKET_NAME)
           .upload(fileName, file, {
             cacheControl: '3600',
             upsert: false,
-            contentType: mimeType
+            contentType: file.type
           });
 
         if (uploadError) {
@@ -106,20 +76,20 @@ export async function deleteImage(imageUrl: string): Promise<void> {
       throw new Error('Authentication required');
     }
 
-    const urlParts = imageUrl.split('/');
-    const fileName = urlParts[urlParts.length - 1];
-    const filePath = `${user.id}/${fileName}`;
+    // Extract the file path from the URL
+    const url = new URL(imageUrl);
+    const pathParts = url.pathname.split('/');
+    const filePath = pathParts[pathParts.length - 1];
 
     const { error: deleteError } = await supabase.storage
       .from(BUCKET_NAME)
-      .remove([filePath]);
+      .remove([`${user.id}/${filePath}`]);
 
     if (deleteError) {
-      console.error('Delete error:', deleteError);
       throw deleteError;
     }
   } catch (error) {
-    console.error('Error in deleteImage:', error);
+    console.error('Error deleting image:', error);
     throw error;
   }
 }

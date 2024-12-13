@@ -24,66 +24,49 @@ const getSupabaseClient = () => {
 export async function updateMenuItem(
   itemId: string,
   updates: Partial<MenuItem>,
-  newImageFiles: string[],
-  existingImageUrls: string[]
+  newImageFiles: File[] | null = null,
+  existingImageUrls: string[] = []
 ): Promise<MenuItem> {
   console.log('[MenuItems Service] Starting updateMenuItem:', {
     itemId,
     updateFields: Object.keys(updates),
-    newImagesCount: newImageFiles.length,
+    newImagesCount: newImageFiles?.length || 0,
     existingImagesCount: existingImageUrls.length
   });
 
   const supabase = getSupabaseClient();
   try {
-    // Handle image changes
-    const imagesToDelete = existingImageUrls.filter(url => !newImageFiles.includes(url));
-    const newImages = newImageFiles.filter(file => !existingImageUrls.includes(file));
-    
-    console.log('[MenuItems Service] Image changes:', {
-      toDelete: imagesToDelete,
-      toUpload: newImages.length,
-      finalImageCount: existingImageUrls.length - imagesToDelete.length + newImages.length
-    });
+    // Get current item to find removed images
+    const { data: currentItem } = await supabase
+      .from('menu_items')
+      .select('image_urls')
+      .eq('id', itemId)
+      .single();
 
-    // Delete removed images
-    if (imagesToDelete.length > 0) {
-      try {
-        console.log('[MenuItems Service] Deleting old images:', imagesToDelete);
-        await Promise.all(imagesToDelete.map(url => deleteImage(url)));
-        console.log('[MenuItems Service] Successfully deleted old images');
-      } catch (error) {
-        console.error('[MenuItems Service] Failed to delete images:', {
-          error,
-          images: imagesToDelete,
-          errorMessage: error.message
-        });
-        throw new Error('Failed to delete old images');
-      }
+    // Find removed images and delete them from storage
+    const removedUrls = currentItem.image_urls?.filter(url => !existingImageUrls.includes(url)) || [];
+    if (removedUrls.length > 0) {
+      console.log('[MenuItems Service] Deleting removed images:', removedUrls);
+      await Promise.all(removedUrls.map(url => deleteImage(url)));
     }
 
-    // Upload new images
-    let uploadedUrls: string[] = [];
-    if (newImages.length > 0) {
+    // Upload new images if provided
+    let finalImageUrls = [...existingImageUrls];
+    
+    if (newImageFiles && newImageFiles.length > 0) {
       try {
         console.log('[MenuItems Service] Uploading new images...');
-        uploadedUrls = await uploadImages(newImages);
+        const uploadedUrls = await uploadImages(newImageFiles);
         console.log('[MenuItems Service] Successfully uploaded new images:', uploadedUrls);
+        finalImageUrls = [...finalImageUrls, ...uploadedUrls];
       } catch (error) {
         console.error('[MenuItems Service] Failed to upload images:', {
           error,
-          images: newImages,
           errorMessage: error.message
         });
         throw new Error('Failed to upload new images');
       }
     }
-
-    // Combine existing and new image URLs
-    const finalImageUrls = [
-      ...existingImageUrls.filter(url => !imagesToDelete.includes(url)),
-      ...uploadedUrls
-    ];
 
     console.log('[MenuItems Service] Updating database with:', {
       itemId,
@@ -104,35 +87,18 @@ export async function updateMenuItem(
       .single();
 
     if (error) {
-      console.error('[MenuItems Service] Database update failed:', {
-        error,
-        errorMessage: error.message,
-        details: error.details
-      });
+      console.error('[MenuItems Service] Database update failed:', error);
       throw error;
     }
 
     if (!data) {
-      console.error('[MenuItems Service] No data returned from update');
-      throw new Error('No data returned from database update');
+      throw new Error('No data returned from update');
     }
 
-    console.log('[MenuItems Service] Successfully updated menu item:', {
-      id: data.id,
-      name: data.name,
-      imageCount: data.image_urls?.length || 0
-    });
-    
-    return {
-      ...data,
-      image_urls: data.image_urls || []
-    };
+    console.log('[MenuItems Service] Successfully updated menu item:', data);
+    return data;
   } catch (error) {
-    console.error('[MenuItems Service] Error in updateMenuItem:', {
-      error,
-      errorMessage: error.message,
-      stack: error.stack
-    });
+    console.error('[MenuItems Service] Error in updateMenuItem:', error);
     throw error;
   }
 }
