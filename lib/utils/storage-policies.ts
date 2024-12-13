@@ -35,7 +35,7 @@ export async function setupStoragePolicies() {
         .createBucket('menu-item-pictures', {
           public: true,
           allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif'],
-          fileSizeLimit: 5242880, // 5MB
+          fileSizeLimit: 10485760, // 10MB
         });
 
       if (createError) {

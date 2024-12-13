@@ -46,7 +46,7 @@ export function MultiImageUpload({
       'image/png': [],
       'image/gif': []
     },
-    maxSize: 5 * 1024 * 1024 // 5MB
+    maxSize: 10 * 1024 * 1024 // 10MB
   });
 
   return (
@@ -68,7 +68,7 @@ export function MultiImageUpload({
               ? "Drop images here"
               : "Drag & drop images here, or click to select"}
           </p>
-          <p className="text-xs mt-1">Maximum file size: 5MB</p>
+          <p className="text-xs mt-1">Maximum file size: 10MB</p>
         </div>
       </div>
 

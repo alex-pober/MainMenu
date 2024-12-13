@@ -1,6 +1,7 @@
 // @ts-nocheck
 
 export interface Menu {
+  menu_categories: any;
   id: string;
   user_id: string;
   name: string;
@@ -43,6 +44,7 @@ export interface MenuItem {
   sort_order: number;
   created_at: string;
   updated_at: string;
+  addons?: string[];
 }
 
 export interface ItemOption {

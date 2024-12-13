@@ -246,48 +246,65 @@ export function MenuItemList({ categoryId, searchQuery, items, onItemsChange }: 
                           <div className="flex items-center gap-2 flex-1 min-w-0 w-full md:w-auto">
                             <GripVertical className="h-5 w-5 text-muted-foreground/50 flex-shrink-0" />
                             <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold truncate">
-                                {item.name}
-                              </h3>
-                              <p className="text-sm text-muted-foreground line-clamp-2">
-                                {item.description}
-                              </p>
-                              <div className="flex flex-wrap gap-1 mt-2">
-                                {item.is_vegan && (
-                                  <Badge variant="outline" className="text-xs bg-emerald-100 text-emerald-800 border-emerald-200">
-                                    🌱 Vegan
-                                  </Badge>
-                                )}
-                                {item.is_vegetarian && (
-                                  <Badge variant="outline" className="text-xs bg-lime-100 text-lime-800 border-lime-200">
-                                    🥚 Vegetarian
-                                  </Badge>
-                                )}
-                                {item.is_spicy && (
-                                  <Badge variant="outline" className="text-xs bg-red-100 text-red-800 border-red-200">
-                                    🌶️ Spicy
-                                  </Badge>
-                                )}
-                                {item.is_new && (
-                                  <Badge variant="outline" className="text-xs bg-blue-100 text-blue-800 border-blue-200">
-                                    ✨ New
-                                  </Badge>
-                                )}
-                                {item.is_limited_time && (
-                                  <Badge variant="outline" className="text-xs bg-yellow-100 text-yellow-800 border-yellow-200">
-                                    ⏳ Limited Time
-                                  </Badge>
-                                )}
-                                {item.is_most_popular && (
-                                  <Badge variant="outline" className="text-xs bg-purple-100 text-purple-800 border-purple-200">
-                                    🔥 Most Popular
-                                  </Badge>
-                                )}
-                                {item.is_special && (
-                                  <Badge variant="outline" className="text-xs bg-green-100 text-green-800 border-green-200">
-                                    ⭐ Special
-                                  </Badge>
-                                )}
+                              <div className="flex flex-col flex-grow gap-1">
+                                <div className="flex items-start justify-between gap-2">
+                                  <div>
+                                    <h3 className="font-medium">{item.name}</h3>
+                                    {item.description && (
+                                      <p className="text-sm text-muted-foreground">
+                                        {item.description}
+                                      </p>
+                                    )}
+                                    <div className="flex flex-wrap gap-1 mt-2">
+                                      {item.is_vegan && (
+                                        <Badge variant="outline" className="text-xs bg-emerald-100 text-emerald-800 border-emerald-200">
+                                          🌱 Vegan
+                                        </Badge>
+                                      )}
+                                      {item.is_vegetarian && (
+                                        <Badge variant="outline" className="text-xs bg-lime-100 text-lime-800 border-lime-200">
+                                          🥚 Vegetarian
+                                        </Badge>
+                                      )}
+                                      {item.is_spicy && (
+                                        <Badge variant="outline" className="text-xs bg-red-100 text-red-800 border-red-200">
+                                          🌶️ Spicy
+                                        </Badge>
+                                      )}
+                                      {item.is_new && (
+                                        <Badge variant="outline" className="text-xs bg-blue-100 text-blue-800 border-blue-200">
+                                          ✨ New
+                                        </Badge>
+                                      )}
+                                      {item.is_limited_time && (
+                                        <Badge variant="outline" className="text-xs bg-yellow-100 text-yellow-800 border-yellow-200">
+                                          ⏳ Limited Time
+                                        </Badge>
+                                      )}
+                                      {item.is_most_popular && (
+                                        <Badge variant="outline" className="text-xs bg-purple-100 text-purple-800 border-purple-200">
+                                          🔥 Most Popular
+                                        </Badge>
+                                      )}
+                                      {item.is_special && (
+                                        <Badge variant="outline" className="text-xs bg-green-100 text-green-800 border-green-200">
+                                          ⭐ Special
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    {item.addons && item.addons.length > 0 && (
+                                      <div className="flex flex-col gap-1 mt-1">
+                                        {item.addons.map((addon, index) => (
+                                          addon.trim() && (
+                                            <Badge key={index} variant="outline" className="text-xs w-fit">
+                                              {addon}
+                                            </Badge>
+                                          )
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>

@@ -52,6 +52,17 @@ export function MenuItems({ categories }: MenuItemsProps) {
                           {item.description}
                         </p>
                       )}
+                      {item.addons && item.addons.length > 0 && (
+                        <div className="flex flex-col gap-1 mt-1">
+                          {item.addons.map((addon, index) => (
+                            addon.trim() && (
+                              <Badge key={index} variant="outline" className="text-xs w-fit">
+                                {addon}
+                              </Badge>
+                            )
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <div className="text-right">
                       <div className="font-medium">

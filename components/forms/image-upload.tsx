@@ -68,10 +68,10 @@ export function ImageUpload({
         return;
       }
 
-      // Validate file size (5MB limit)
-      const MAX_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+      // Validate file size (10MB limit)
+      const MAX_SIZE = 10 * 1024 * 1024; // 10MB in bytes
       if (file.size > MAX_SIZE) {
-        toast.error('Image size should be less than 5MB');
+        toast.error('Image size should be less than 10MB');
         return;
       }
 

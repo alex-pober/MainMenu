@@ -18,6 +18,9 @@ import { createBrowserClient } from '@supabase/ssr';
 import { useToast } from '@/hooks/use-toast';
 import type { MenuCategory, MenuItem } from '@/lib/types';
 import { cn } from "@/lib/utils";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 
 interface MenuCategoryListProps {
   categories: MenuCategory[];
@@ -28,6 +31,10 @@ interface MenuCategoryListProps {
 export function MenuCategoryList({ categories, setCategories, searchQuery }: MenuCategoryListProps) {
   const [selectedCategory, setSelectedCategory] = useState<MenuCategory | null>(null);
   const [isCreateItemDialogOpen, setIsCreateItemDialogOpen] = useState(false);
+  const [isRenameCategoryDialogOpen, setIsRenameCategoryDialogOpen] = useState(false);
+  const [categoryToRename, setCategoryToRename] = useState<MenuCategory | null>(null);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [newCategoryDescription, setNewCategoryDescription] = useState("");
   const [categoryItems, setCategoryItems] = useState<Record<string, MenuItem[]>>({});
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
@@ -191,6 +198,52 @@ export function MenuCategoryList({ categories, setCategories, searchQuery }: Men
     setExpandedCategories(newExpandedState);
   };
 
+  const handleRenameCategory = async (categoryId: string) => {
+    try {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+
+      const { error } = await supabase
+        .from('menu_categories')
+        .update({
+          name: newCategoryName,
+          description: newCategoryDescription
+        })
+        .eq('id', categoryId);
+
+      if (error) throw error;
+
+      // Update local state
+      setCategories(categories.map(cat => 
+        cat.id === categoryId ? { 
+          ...cat, 
+          name: newCategoryName,
+          description: newCategoryDescription 
+        } : cat
+      ));
+
+      toast({
+        title: "Success",
+        description: "Category updated successfully",
+      });
+
+      // Reset state
+      setIsRenameCategoryDialogOpen(false);
+      setCategoryToRename(null);
+      setNewCategoryName("");
+      setNewCategoryDescription("");
+    } catch (error) {
+      console.error('Error updating category:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update category",
+        variant: "destructive"
+      });
+    }
+  };
+
   const filteredCategories = categories.filter(category => {
     const categoryMatch = category.name.toLowerCase().includes(searchQuery.toLowerCase());
     if (categoryMatch) return true;
@@ -289,11 +342,21 @@ export function MenuCategoryList({ categories, setCategories, searchQuery }: Men
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setCategoryToRename(category);
+                                    setNewCategoryName(category.name);
+                                    setNewCategoryDescription(category.description || '');
+                                    setIsRenameCategoryDialogOpen(true);
+                                  }}
+                                >
+                                  Edit Category
+                                </DropdownMenuItem>
                                 <DropdownMenuItem 
                                   onClick={() => handleDeleteCategory(category.id)}
                                   className="text-destructive focus:text-destructive"
                                 >
-                                  Delete Category
+                                  Delete
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
@@ -328,6 +391,50 @@ export function MenuCategoryList({ categories, setCategories, searchQuery }: Men
             onItemCreated={(newItem) => handleItemCreated(selectedCategory.id, newItem)}
           />
         )}
+        {/* Rename Category Dialog */}
+        <Dialog open={isRenameCategoryDialogOpen} onOpenChange={setIsRenameCategoryDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Category</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              if (categoryToRename) {
+                handleRenameCategory(categoryToRename.id);
+              }
+            }}>
+              <div className="space-y-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="categoryName">Category Name</Label>
+                  <Input
+                    id="categoryName"
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    placeholder="Enter category name"
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="categoryDescription">Description</Label>
+                  <Input
+                    id="categoryDescription"
+                    value={newCategoryDescription}
+                    onChange={(e) => setNewCategoryDescription(e.target.value)}
+                    placeholder="Enter category description"
+                  />
+                </div>
+              </div>
+              <DialogFooter className="mt-4">
+                <Button type="button" variant="outline" onClick={() => setIsRenameCategoryDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit">
+                  Save Changes
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </DragDropContext>
   );

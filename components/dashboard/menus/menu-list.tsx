@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { EditMenuDialog } from './edit-menu-dialog';
 import { CreateMenuDialog } from './create-menu-dialog';
 import { Menu } from '@/lib/types';
+import { deleteImage } from '@/lib/utils/upload';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 interface MenuListProps {
@@ -111,6 +112,40 @@ export function MenuList({ searchQuery }: MenuListProps) {
     if (!supabase || !user) return;
 
     try {
+      // First get all menu items with images for this menu
+      const { data: menuData, error: menuError } = await supabase
+        .from('menus')
+        .select(`
+          menu_categories (
+            menu_items (
+              image_urls
+            )
+          )
+        `)
+        .eq('id', menuId)
+        .eq('user_id', user.id)
+        .single();
+
+      if (menuError) throw menuError;
+
+      // Delete all images from storage
+      const deleteImagePromises: Promise<void>[] = [];
+      menuData?.menu_categories?.forEach(category => {
+        category.menu_items?.forEach(item => {
+          if (item.image_urls?.length > 0) {
+            item.image_urls.forEach(url => {
+              deleteImagePromises.push(deleteImage(url));
+            });
+          }
+        });
+      });
+
+      // Wait for all images to be deleted
+      if (deleteImagePromises.length > 0) {
+        await Promise.all(deleteImagePromises);
+      }
+
+      // Now delete the menu (this will cascade delete categories and items)
       const { error } = await supabase
         .from('menus')
         .delete()
@@ -124,11 +159,11 @@ export function MenuList({ searchQuery }: MenuListProps) {
 
       toast({
         title: "Success",
-        description: "Menu deleted successfully",
+        description: "Menu and all associated items deleted successfully",
       });
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: "Error", 
         description: error.message,
         variant: "destructive",
       });
@@ -292,21 +327,15 @@ export function MenuList({ searchQuery }: MenuListProps) {
                       className="cursor-pointer"
                     >
                       <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0">
                           <div className="flex items-center space-x-2">
                             <div {...provided.dragHandleProps}>
                               <GripVertical className="h-5 w-5 text-muted-foreground cursor-grab" />
                             </div>
                             <div>
-                              <CardTitle className="text-sm font-medium">
+                              <CardTitle className="text-lg font-medium">
                                 {menu.name}
                               </CardTitle>
-                              <CardDescription className="text-xs">
-                                Last updated{" "}
-                                {formatDistanceToNow(new Date(menu.updated_at), {
-                                  addSuffix: true,
-                                })}
-                              </CardDescription>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">

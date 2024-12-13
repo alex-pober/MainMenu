@@ -1,11 +1,12 @@
 // @ts-nocheck
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { MultiImageUpload } from "@/components/ui/multi-image-upload";
+import { Plus, X, Loader2 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { createBrowserClient } from '@supabase/ssr';
 import { uploadImages } from '@/lib/utils/upload';
@@ -40,7 +41,8 @@ export function CreateItemDialog({
     is_vegan: false,
     is_vegetarian: false,
     image_urls: [],
-    sort_order: 0
+    sort_order: 0,
+    addons: []
   });
   const { toast } = useToast();
 
@@ -105,7 +107,8 @@ export function CreateItemDialog({
         is_vegan: false,
         is_vegetarian: false,
         image_urls: [],
-        sort_order: 0
+        sort_order: 0,
+        addons: []
       });
       setImageFiles([]);
       
@@ -122,164 +125,172 @@ export function CreateItemDialog({
     }
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setImageFiles(Array.from(e.target.files).map(file => URL.createObjectURL(file)));
+    }
+  };
+
+  const handleRemoveImage = (url: string) => {
+    setImageFiles(prev => prev.filter(image => image !== url));
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add New Item</DialogTitle>
+          <DialogTitle>Create Item</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+              e.preventDefault();
+            }
+          }}
+          className="space-y-4"
+        >
           <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <Label>Item Name</Label>
-              <Input
-                id="name"
-                placeholder="Enter item name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="description">Description</Label>
-              <Input
-                id="description"
-                placeholder="Enter item description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="price">Price</Label>
-              <Input
-                id="price"
-                type="number"
-                min="0"
-                step="0.01"
-                value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
-                required
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label>Images</Label>
-              <MultiImageUpload
-                value={imageFiles}
-                onChange={setImageFiles}
-                onRemove={(index) => {
-                  setImageFiles(prev => prev.filter((_, i) => i !== index));
-                }}
-              />
-              <div className="text-xs text-muted-foreground">
-                Upload up to 5 images. Supported formats: JPEG, PNG, WebP. Max size: 5MB each.
-              </div>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="is_available">Availability</Label>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="is_available"
-                  checked={formData.is_available}
-                  onCheckedChange={(checked) => 
-                    setFormData({ ...formData, is_available: checked as boolean })
-                  }
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Item Name</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
                 />
-                <label
-                  htmlFor="is_available"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Available
-                </label>
+              </div>
+              <div className="space-y-2">
+                <Label>Price</Label>
+                <Input
+                  id="price"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formData.price}
+                  onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
+                />
               </div>
             </div>
-            <div className="space-y-4">
-              <Label>Item Labels</Label>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="is_spicy"
-                    checked={formData.is_spicy}
-                    onCheckedChange={(checked) => 
-                      setFormData({ ...formData, is_spicy: checked as boolean })
-                    }
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Textarea
+                id="description"
+                value={formData.description || ''}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                className="h-20"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Add-ons (one per line)</Label>
+              <Textarea
+                id="addons"
+                className="h-24"
+                value={formData.addons?.join('\n') || ''}
+                onChange={(e) => {
+                  const lines = e.target.value.split('\n');
+                  setFormData(prev => ({ ...prev, addons: lines }));
+                }}
+                placeholder="Add Chicken +7&#10;Extra Sauce +1&#10;Add Avocado +3"
+              />
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+              <Label className="flex items-center gap-2">
+                <Checkbox
+                  checked={formData.is_vegan}
+                  onCheckedChange={(checked) => setFormData({ ...formData, is_vegan: !!checked })}
+                />
+                🌱 Vegan
+              </Label>
+              <Label className="flex items-center gap-2">
+                <Checkbox
+                  checked={formData.is_vegetarian}
+                  onCheckedChange={(checked) => setFormData({ ...formData, is_vegetarian: !!checked })}
+                />
+                🥚 Vegetarian
+              </Label>
+              <Label className="flex items-center gap-2">
+                <Checkbox
+                  checked={formData.is_spicy}
+                  onCheckedChange={(checked) => setFormData({ ...formData, is_spicy: !!checked })}
+                />
+                🌶️ Spicy
+              </Label>
+              <Label className="flex items-center gap-2">
+                <Checkbox
+                  checked={formData.is_new}
+                  onCheckedChange={(checked) => setFormData({ ...formData, is_new: !!checked })}
+                />
+                ✨ New
+              </Label>
+              <Label className="flex items-center gap-2">
+                <Checkbox
+                  checked={formData.is_limited_time}
+                  onCheckedChange={(checked) => setFormData({ ...formData, is_limited_time: !!checked })}
+                />
+                ⏳ Limited Time
+              </Label>
+              <Label className="flex items-center gap-2">
+                <Checkbox
+                  checked={formData.is_most_popular}
+                  onCheckedChange={(checked) => setFormData({ ...formData, is_most_popular: !!checked })}
+                />
+                🔥 Popular
+              </Label>
+              <Label className="flex items-center gap-2">
+                <Checkbox
+                  checked={formData.is_special}
+                  onCheckedChange={(checked) => setFormData({ ...formData, is_special: !!checked })}
+                />
+                ⭐ Special
+              </Label>
+              <Label className="flex items-center gap-2">
+                <Checkbox
+                  checked={formData.is_available}
+                  onCheckedChange={(checked) => setFormData({ ...formData, is_available: !!checked })}
+                />
+                Available
+              </Label>
+            </div>
+            <div className="space-y-2">
+              <Label>Images</Label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                <div className="relative aspect-square rounded-lg border-2 border-dashed border-muted-foreground/25 hover:border-muted-foreground/50 transition-colors">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    multiple
                   />
-                  <label htmlFor="is_spicy" className="text-sm">Spicy</label>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Plus className="w-6 h-6 text-muted-foreground/50" />
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="is_new"
-                    checked={formData.is_new}
-                    onCheckedChange={(checked) => 
-                      setFormData({ ...formData, is_new: checked as boolean })
-                    }
-                  />
-                  <label htmlFor="is_new" className="text-sm">New Item</label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="is_limited_time"
-                    checked={formData.is_limited_time}
-                    onCheckedChange={(checked) => 
-                      setFormData({ ...formData, is_limited_time: checked as boolean })
-                    }
-                  />
-                  <label htmlFor="is_limited_time" className="text-sm">Limited Time</label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="is_most_popular"
-                    checked={formData.is_most_popular}
-                    onCheckedChange={(checked) => 
-                      setFormData({ ...formData, is_most_popular: checked as boolean })
-                    }
-                  />
-                  <label htmlFor="is_most_popular" className="text-sm">Most Popular</label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="is_special"
-                    checked={formData.is_special}
-                    onCheckedChange={(checked) => 
-                      setFormData({ ...formData, is_special: checked as boolean })
-                    }
-                  />
-                  <label htmlFor="is_special" className="text-sm">Special</label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="is_vegan"
-                    checked={formData.is_vegan}
-                    onCheckedChange={(checked) => 
-                      setFormData({ ...formData, is_vegan: checked as boolean })
-                    }
-                  />
-                  <label htmlFor="is_vegan" className="text-sm">Vegan</label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="is_vegetarian"
-                    checked={formData.is_vegetarian}
-                    onCheckedChange={(checked) => 
-                      setFormData({ ...formData, is_vegetarian: checked as boolean })
-                    }
-                  />
-                  <label htmlFor="is_vegetarian" className="text-sm">Vegetarian</label>
-                </div>
+                {imageFiles.map((url, index) => (
+                  <div key={url} className="relative aspect-square">
+                    <img
+                      src={url}
+                      alt={`Preview ${index + 1}`}
+                      className="object-cover rounded-lg w-full h-full"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(url)}
+                      className="absolute -top-2 -right-2 p-1 bg-destructive text-destructive-foreground rounded-full shadow-lg hover:bg-destructive/90 transition-colors"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={isLoading}
-            >
-              Cancel
-            </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Creating..." : "Create Item"}
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Create Item
             </Button>
           </DialogFooter>
         </form>

@@ -18,6 +18,7 @@ interface MenuItem {
   price: number;
   category: string;
   image_url?: string;
+  addons?: any;
 }
 
 interface Menu {
@@ -107,7 +108,9 @@ export default function MenuPage() {
             *,
             menu_categories (
               *,
-              menu_items (*)
+              menu_items (
+                *
+              )
             )
           `)
           .eq('user_id', userData.user_id)

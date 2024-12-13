@@ -20,13 +20,33 @@ export async function uploadImages(imageFiles: string[]): Promise<string[]> {
 
     const uploadPromises = imageFiles.map(async (imageFile) => {
       try {
+        // Check if the image data is valid
+        if (!imageFile || !imageFile.includes('base64,')) {
+          throw new Error('Invalid image data');
+        }
+
+        // Get the mime type from the base64 string
+        const mimeType = imageFile.split(';')[0].split(':')[1];
+        if (!['image/jpeg', 'image/png', 'image/gif'].includes(mimeType)) {
+          throw new Error('Invalid image type. Only JPEG, PNG, and GIF are supported.');
+        }
+
         // Convert base64 to blob
-        const base64Data = imageFile.split(',')[1];
+        const base64Data = imageFile.split('base64,')[1];
+        
+        // Check file size before decoding (base64 is ~4/3 the size of binary)
+        const estimatedSize = (base64Data.length * 3) / 4;
+        if (estimatedSize > 10 * 1024 * 1024) { // 10MB limit
+          throw new Error('File size exceeds 10MB limit');
+        }
+
+        // Decode base64
         const byteCharacters = atob(base64Data);
         const byteArrays = [];
+        const sliceSize = 512;
         
-        for (let offset = 0; offset < byteCharacters.length; offset += 512) {
-          const slice = byteCharacters.slice(offset, offset + 512);
+        for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+          const slice = byteCharacters.slice(offset, offset + sliceSize);
           const byteNumbers = new Array(slice.length);
           
           for (let i = 0; i < slice.length; i++) {
@@ -37,20 +57,27 @@ export async function uploadImages(imageFiles: string[]): Promise<string[]> {
           byteArrays.push(byteArray);
         }
         
-        const blob = new Blob(byteArrays, { type: 'image/jpeg' });
-        const fileName = `${user.id}/${uuidv4()}.jpg`;
-        const file = new File([blob], fileName, { type: 'image/jpeg' });
+        // Create blob with original mime type
+        const blob = new Blob(byteArrays, { type: mimeType });
+        const extension = mimeType.split('/')[1];
+        const fileName = `${user.id}/${uuidv4()}.${extension}`;
+        const file = new File([blob], fileName, { type: mimeType });
 
         const { data, error: uploadError } = await supabase.storage
           .from(BUCKET_NAME)
           .upload(fileName, file, {
             cacheControl: '3600',
-            upsert: false
+            upsert: false,
+            contentType: mimeType
           });
 
         if (uploadError) {
           console.error('Upload error:', uploadError);
           throw uploadError;
+        }
+
+        if (!data?.path) {
+          throw new Error('Upload successful but path is missing');
         }
 
         const { data: { publicUrl } } = supabase.storage

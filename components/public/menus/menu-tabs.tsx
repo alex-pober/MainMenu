@@ -54,6 +54,7 @@ export function MenuTabs({ userId }: MenuTabsProps) {
                 description,
                 price,
                 image_urls,
+                addons,
                 is_available,
                 is_spicy,
                 is_new,
@@ -75,7 +76,16 @@ export function MenuTabs({ userId }: MenuTabsProps) {
         if (menuError) throw menuError;
 
         if (menuData && menuData.length > 0) {
+          console.log('Menu data fetched:', menuData);
           setMenus(menuData);
+          const categoriesMap: Record<string, MenuCategory[]> = {};
+          menuData.forEach((menu: Menu) => {
+            if (menu.menu_categories) {
+              console.log('Menu categories for', menu.name, ':', menu.menu_categories);
+              categoriesMap[menu.id] = menu.menu_categories;
+            }
+          });
+          setCategories(categoriesMap);
           setActiveMenu(menuData[0].id);
 
           // Organize categories by menu_id and sort them by sort_order

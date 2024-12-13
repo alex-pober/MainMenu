@@ -6,111 +6,101 @@ import { Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 
-const plans = [
-  {
-    name: "Starter",
-    price: "29",
-    description: "Perfect for small restaurants",
-    features: [
-      "Up to 50 menu items",
-      "Basic QR code generation",
-      "Menu analytics",
-      "Email support"
-    ]
-  },
-  {
-    name: "Professional",
-    price: "79",
-    description: "For growing establishments",
-    features: [
-      "Unlimited menu items",
-      "Custom QR code design",
-      "Advanced analytics",
-      "Priority support",
-      "Menu categories",
-      "Real-time updates"
-    ],
-    popular: true
-  },
-  {
-    name: "Enterprise",
-    price: "199",
-    description: "For restaurant chains",
-    features: [
-      "Multiple locations",
-      "API access",
-      "White-label solution",
-      "24/7 phone support",
-      "Custom integration",
-      "Dedicated account manager"
-    ]
-  }
-];
-
 export function PricingSection() {
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1
   });
 
-  return (
-    <section id="pricing" className="py-24 bg-muted/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold mb-4">Simple, Transparent Pricing</h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Choose the perfect plan for your restaurant. All plans include a 14-day free trial.
-          </p>
-        </div>
-
-        <div
-          ref={ref}
-          className="grid grid-cols-1 md:grid-cols-3 gap-8"
+return (
+  <section id="pricing" className="relative py-24 overflow-hidden">
+    <div className="absolute inset-0 bg-gradient-to-b from-muted/50 to-background" />
+    <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="text-center mb-16"
+      >
+        <motion.h2 
+          className="text-4xl font-bold bg-gradient-to-r from-[#FD851C] to-[#FD851C] bg-clip-text text-transparent"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
         >
-          {plans.map((plan, index) => (
-            <motion.div
-              key={plan.name}
-              initial={{ opacity: 0, y: 20 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-            >
-              <Card className={`relative h-full ${plan.popular ? 'border-primary shadow-lg' : ''}`}>
-                {plan.popular && (
-                  <div className="absolute top-0 right-0 -translate-y-1/2 px-3 py-1 bg-primary text-primary-foreground text-sm rounded-full">
-                    Most Popular
-                  </div>
-                )}
-                <CardHeader>
-                  <CardTitle>{plan.name}</CardTitle>
-                  <CardDescription>{plan.description}</CardDescription>
-                  <div className="mt-4">
-                    <span className="text-4xl font-bold">${plan.price}</span>
-                    <span className="text-muted-foreground">/month</span>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-3">
-                    {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-center">
-                        <Check className="w-5 h-5 text-primary mr-2" />
-                        {feature}
+          One Simple Plan
+        </motion.h2>
+        <motion.p 
+          className="text-lg text-muted-foreground max-w-2xl mx-auto"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          Everything you need, no hidden fees, cancel anytime
+        </motion.p>
+      </motion.div>
+
+      <div ref={ref} className="max-w-4xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5 }}
+          className="relative"
+        >
+          {/* Decorative elements */}
+          <div className="absolute inset-0 -z-10 bg-gradient-to-b from-[#FD851C]/20 via-[#FD851C]/10 to-transparent rounded-2xl transform scale-105 blur-2xl" />
+          <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#FD851C]/10 via-white to-[#FD851C]/10 rounded-2xl transform scale-105 blur-xl" />
+          <div className="relative rounded-2xl overflow-hidden border border-[#FD851C]/20 shadow-xl bg-white">
+          <Card className='border-none p-6'> 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-6">
+                <div>
+                  <CardTitle className="text-3xl mb-3">Everything You Need</CardTitle>
+                  <CardDescription className="text-lg">First 30 days on us</CardDescription>
+                </div>
+                
+                <CardContent className="p-0 border-none">
+                  <ul className="space-y-4">
+                    {[
+                      "Unlimited Menu Items",
+                      "QR Code Generation",
+                      "Real-time Menu Updates",
+                      "Mobile Optimized Design",
+                      "Cancel Anytime"
+                    ].map((feature) => (
+                      <li key={feature} className="flex items-center gap-3 text-gray-600">
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-[#FD851C]/10 flex items-center justify-center">
+                          <Check className="w-4 h-4 text-[#FD851C]" />
+                        </div>
+                        <span className="text-lg">{feature}</span>
                       </li>
                     ))}
                   </ul>
                 </CardContent>
-                <CardFooter>
-                  <Button
-                    variant={plan.popular ? "default" : "outline"}
-                    className="w-full"
-                  >
-                    Get Started
-                  </Button>
-                </CardFooter>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
+              </div>
+
+              <div className="flex flex-col justify-between space-y-6">
+                <div className="text-center md:text-right">
+                  <div className="flex items-start justify-center md:justify-end">
+                    <span className="text-xl mt-2">$</span>
+                    <span className="text-6xl font-bold text-[#FD851C]">9.99</span>
+                    <span className="text-xl mt-2">/mo</span>
+                  </div>
+                </div>
+                
+                <Button
+                  className="w-full bg-[#FD851C] hover:bg-[#FD851C]/90 text-white rounded-full h-14 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  Start 30-Day Free Trial
+                </Button>
+              </div>
+            </div>
+          </Card>
+          </div>
+        </motion.div>
+        <div/>
       </div>
-    </section>
-  );
+    </div>
+  </section>
+);
 }
