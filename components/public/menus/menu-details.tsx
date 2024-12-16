@@ -295,7 +295,7 @@ export function MenuDetails({ menu, categories, activeFilters }: MenuDetailsProp
                     <div className="flex justify-between items-start gap-2">
                       <h5 className="text-lg font-medium">{item.name}</h5>
                       <div className="text-base font-medium whitespace-nowrap">
-                        ${item.price.toFixed(2)}
+                        {item.price !== null ? `$${item.price.toFixed(2)}` : <></>}
                       </div>
                     </div>
                     {item.description && (

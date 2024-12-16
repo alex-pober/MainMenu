@@ -66,7 +66,7 @@ export function MenuItems({ categories }: MenuItemsProps) {
                     </div>
                     <div className="text-right">
                       <div className="font-medium">
-                        ${item.price.toFixed(2)}
+                        {item.price !== null ? `$${item.price.toFixed(2)}` : <></>}
                       </div>
                       {!item.is_available && (
                         <Badge variant="secondary" className="mt-1">

@@ -10,16 +10,17 @@ import { MenuTabs } from '@/components/public/menus/menu-tabs';
 import { DotPattern } from '@/components/ui/dot-pattern';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { MenuItem } from '@/lib/types';
 
-interface MenuItem {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  image_url?: string;
-  addons?: any;
-}
+// interface MenuItem {
+//   id: string;
+//   name: string;
+//   description: string;
+//   price: number | null;
+//   category: string;
+//   image_url?: string;
+//   addons?: any;
+// }
 
 interface Menu {
   id: string;
@@ -217,7 +218,7 @@ export default function MenuPage() {
               </div>
             </div>
           ) : (
-            <div className="relative py-16 sm:py-24 text-center w-full flex-col items-center justify-center overflow-hidden rounded-lg bg-background md:shadow-xl">
+            <div className="relative py-16 sm:py-24 text-center w-full flex-col items-center justify-center overflow-hidden rounded-lg bg-background ">
               <DotPattern 
                 className={cn(
                   "[mask-image:radial-gradient(300px_80px_ellipse_at_center,white,transparent)]"
