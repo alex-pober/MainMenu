@@ -46,7 +46,7 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 items-center justify-items-center max-w-2xl mx-auto pt-12"
+            className="grid grid-cols-3 gap-8 md:gap-12 items-center justify-items-center max-w-2xl mx-auto pt-12"
           >
             <div className="text-center space-y-3">
               <div className="mx-auto w-12 h-12 flex items-center justify-center bg-[#FD851C]/10 rounded-xl">
@@ -74,14 +74,14 @@ export function HeroSection() {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="relative mt-16 mx-auto max-w-3xl"
           >
-            <div className="absolute inset-0 -z-10 bg-gradient-to-b from-[#FD851C]/20 via-[#FD851C]/10 to-transparent rounded-2xl transform scale-105 blur-2xl" />
-            <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#FD851C]/10 via-white to-[#FD851C]/10 rounded-2xl transform scale-105 blur-xl" />
+            {/* <div className="absolute inset-0 -z-10 bg-gradient-to-b from-[#FD851C]/20 via-[#FD851C]/10 to-transparent rounded-2xl transform scale-105 blur-2xl" />
+            <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#FD851C]/10 via-white to-[#FD851C]/10 rounded-2xl transform scale-105 blur-xl" /> */}
             <div className="relative aspect-[16/9] rounded-2xl overflow-hidden">
               <Image
-                src="/images/Hero Desktop-Phone.png"
+                src="/images/341shots_so.webp"
                 alt="Restaurant menu dashboard preview"
                 fill
-                className="object-cover"
+                className="object-fill"
                 priority
               />
             </div>

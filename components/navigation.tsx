@@ -49,7 +49,7 @@ export function Navigation() {
 
   return (
     <div className="fixed w-full z-50 flex justify-center">
-      <nav className="fixed w-screen max-w-7xl rounded-md h-16 m-1.5 bg-white/50 backdrop-blur-md border border-white/20 shadow-lg z-50">
+      <nav className="fixed w-screen max-w-7xl rounded-md h-12 bg-white/50 backdrop-blur-md border border-white/20 shadow-lg z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
           <div className="flex items-center justify-between h-full">
             <Link href="/" className="flex items-center">
