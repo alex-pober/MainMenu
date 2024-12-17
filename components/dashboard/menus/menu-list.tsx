@@ -339,6 +339,9 @@ export function MenuList({ searchQuery }: MenuListProps) {
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
+                            <Badge variant={menu.status === "active" ? "default" : "secondary"}>
+                              {menu.status}
+                            </Badge>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                                 <Button variant="ghost" size="icon">
@@ -380,18 +383,11 @@ export function MenuList({ searchQuery }: MenuListProps) {
                           </div>
                         </CardHeader>
                         <CardContent>
-                          <div className="flex justify-between items-center mb-4">
+                          <div className="flex justify-between items-center">
                             <div className="text-sm text-muted-foreground">
                               {menu.description}
                             </div>
-                            <Badge variant={menu.status === "active" ? "default" : "secondary"}>
-                              {menu.status}
-                            </Badge>
-                          </div>
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <Clock className="mr-2 h-4 w-4" />
-                            Updated {formatDistanceToNow(new Date(menu.updated_at), { addSuffix: true })}
-                          </div>
+                          </div> 
                         </CardContent>
                       </Card>
                     </div>

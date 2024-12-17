@@ -245,7 +245,7 @@ export default function DashboardLayout({
           </div>
 
           <div className="bg-background rounded-lg h-full">
-            <div className="p-2 sm:p-6">
+            <div className="p-2 sm:p-6 max-w-screen-xl mx-auto">
               {children}
             </div>
           </div>

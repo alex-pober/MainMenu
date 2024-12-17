@@ -26,9 +26,10 @@ interface MenuCategoryListProps {
   categories: MenuCategory[];
   setCategories: (categories: MenuCategory[]) => void;
   searchQuery: string;
+  expandedCategories: boolean;
 }
 
-export function MenuCategoryList({ categories, setCategories, searchQuery }: MenuCategoryListProps) {
+export function MenuCategoryList({ categories, setCategories, searchQuery, expandedCategories }: MenuCategoryListProps) {
   const [selectedCategory, setSelectedCategory] = useState<MenuCategory | null>(null);
   const [isCreateItemDialogOpen, setIsCreateItemDialogOpen] = useState(false);
   const [isRenameCategoryDialogOpen, setIsRenameCategoryDialogOpen] = useState(false);
@@ -36,7 +37,7 @@ export function MenuCategoryList({ categories, setCategories, searchQuery }: Men
   const [newCategoryName, setNewCategoryName] = useState("");
   const [newCategoryDescription, setNewCategoryDescription] = useState("");
   const [categoryItems, setCategoryItems] = useState<Record<string, MenuItem[]>>({});
-  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+  const [expandedStates, setExpandedStates] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
 
   // Fetch items for all categories when component mounts or categories change
@@ -79,14 +80,14 @@ export function MenuCategoryList({ categories, setCategories, searchQuery }: Men
     }
   }, [categories]);
 
-  // Initialize expanded state for all categories
+  // Update expanded states when expandedCategories prop changes
   useEffect(() => {
-    const initialExpandedState = categories.reduce((acc, category) => ({
+    const newExpandedState = categories.reduce((acc, category) => ({
       ...acc,
-      [category.id]: false // Start collapsed by default
+      [category.id]: expandedCategories
     }), {});
-    setExpandedCategories(initialExpandedState);
-  }, []);  // Only run on mount, removed categories dependency
+    setExpandedStates(newExpandedState);
+  }, [expandedCategories, categories]);
 
   const handleDragEnd = async (result: any) => {
     if (!result.destination) return;
@@ -100,9 +101,6 @@ export function MenuCategoryList({ categories, setCategories, searchQuery }: Men
       ...item,
       sort_order: index,
     }));
-
-    // Preserve the current expanded states exactly as they are
-    const currentExpandedState = { ...expandedCategories };
 
     setCategories(updatedItems);
 
@@ -211,22 +209,6 @@ export function MenuCategoryList({ categories, setCategories, searchQuery }: Men
     }
   };
 
-  const handleExpandAll = () => {
-    const newExpandedState = categories.reduce((acc, category) => ({
-      ...acc,
-      [category.id]: true
-    }), {});
-    setExpandedCategories(newExpandedState);
-  };
-
-  const handleCollapseAll = () => {
-    const newExpandedState = categories.reduce((acc, category) => ({
-      ...acc,
-      [category.id]: false
-    }), {});
-    setExpandedCategories(newExpandedState);
-  };
-
   const handleRenameCategory = async (categoryId: string) => {
     try {
       const supabase = createBrowserClient(
@@ -273,6 +255,13 @@ export function MenuCategoryList({ categories, setCategories, searchQuery }: Men
     }
   };
 
+  const handleCategoryToggle = (categoryId: string) => {
+    setExpandedStates(prev => ({
+      ...prev,
+      [categoryId]: !prev[categoryId]
+    }));
+  };
+
   const filteredCategories = categories.filter(category => {
     const categoryMatch = category.name.toLowerCase().includes(searchQuery.toLowerCase());
     if (categoryMatch) return true;
@@ -288,112 +277,94 @@ export function MenuCategoryList({ categories, setCategories, searchQuery }: Men
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
       <div className="space-y-4">
-        <div className="flex items-center justify-end gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExpandAll}
-            className="text-xs"
-          >
-            <ChevronDown className="mr-1 h-3 w-3" />
-            Expand All
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleCollapseAll}
-            className="text-xs"
-          >
-            <ChevronUp className="mr-1 h-3 w-3" />
-            Collapse All
-          </Button>
-        </div>
         <Droppable droppableId="categories">
           {(provided) => (
-            <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-8">
+            <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-4">
               {filteredCategories.map((category, index) => (
-                <Draggable key={category.id} draggableId={category.id} index={index}>
-                  {(provided) => (
+                <Draggable
+                  key={category.id}
+                  draggableId={category.id}
+                  index={index}
+                >
+                  {(provided, snapshot) => (
                     <div
                       ref={provided.innerRef}
                       {...provided.draggableProps}
-                      className="group"
                     >
                       <Card className="bg-gradient-to-r from-background to-muted border-l-4 border-l-primary/20">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                          <div className="flex items-center space-x-3">
-                            <div {...provided.dragHandleProps}>
-                              <GripVertical className="h-5 w-5 text-muted-foreground cursor-grab" />
+                        <CardHeader>
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                            <div className="flex items-center gap-2">
+                              <div {...provided.dragHandleProps}>
+                                <GripVertical className="h-4 w-4 text-muted-foreground/40" />
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleCategoryToggle(category.id)}
+                                className="hover:text-primary"
+                              >
+                                {expandedStates[category.id] ? (
+                                  <ChevronDown className="h-4 w-4" />
+                                ) : (
+                                  <ChevronRight className="h-4 w-4" />
+                                )}
+                              </Button>
+                              <div className="space-y-1">
+                                <CardTitle className="text-xl">
+                                  {category.name}
+                                </CardTitle>
+                                {category.description && (
+                                  <p className="text-sm text-muted-foreground">
+                                    {category.description}
+                                  </p>
+                                )}
+                              </div>
                             </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => setExpandedCategories(prev => ({
-                                ...prev,
-                                [category.id]: !prev[category.id]
-                              }))}
-                              className="hover:text-primary"
-                            >
-                              {expandedCategories[category.id] ? (
-                                <ChevronDown className="h-4 w-4" />
-                              ) : (
-                                <ChevronRight className="h-4 w-4" />
-                              )}
-                            </Button>
-                            <div className="space-y-1">
-                              <CardTitle className="text-xl">
-                                {category.name}
-                              </CardTitle>
-                              {category.description && (
-                                <p className="text-sm text-muted-foreground">
-                                  {category.description}
-                                </p>
-                              )}
+                            <div className="flex items-center gap-2 ml-auto">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedCategory(category);
+                                  setIsCreateItemDialogOpen(true);
+                                }}
+                                className="transition-all hover:border-primary hover:text-primary whitespace-nowrap"
+                              >
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add Item
+                              </Button>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="hover:text-primary">
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      setCategoryToRename(category);
+                                      setNewCategoryName(category.name);
+                                      setNewCategoryDescription(category.description || '');
+                                      setIsRenameCategoryDialogOpen(true);
+                                    }}
+                                  >
+                                    Edit Category
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem 
+                                    onClick={() => handleDeleteCategory(category.id)}
+                                    className="text-destructive focus:text-destructive"
+                                  >
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedCategory(category);
-                                setIsCreateItemDialogOpen(true);
-                              }}
-                              className="transition-all hover:border-primary hover:text-primary"
-                            >
-                              <Plus className="mr-2 h-4 w-4" />
-                              Add Item
-                            </Button>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="hover:text-primary">
-                                  <MoreVertical className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem
-                                  onClick={() => {
-                                    setCategoryToRename(category);
-                                    setNewCategoryName(category.name);
-                                    setNewCategoryDescription(category.description || '');
-                                    setIsRenameCategoryDialogOpen(true);
-                                  }}
-                                >
-                                  Edit Category
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  onClick={() => handleDeleteCategory(category.id)}
-                                  className="text-destructive focus:text-destructive"
-                                >
-                                  Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
                           </div>
                         </CardHeader>
                         <CardContent className={cn(
                           "grid transition-all",
-                          expandedCategories[category.id] ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                          expandedStates[category.id] ? "grid-rows-[1fr]" : "grid-rows-[0fr] p-0"
                         )}>
                           <div className="overflow-hidden">
                             <MenuItemList 

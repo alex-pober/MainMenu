@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Plus, Search, ExternalLink, Save } from 'lucide-react';
+import { Plus, Search, ExternalLink, Save, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,6 +24,7 @@ export function MenuDetails() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [expandedCategories, setExpandedCategories] = useState(false);
   const { toast } = useToast();
 
   // Add form state
@@ -201,23 +202,40 @@ export function MenuDetails() {
         </div>
       </div>
 
-      <div className="flex justify-between items-center pt-2">
-        <h2 className="text-2xl font-semibold">Menu Categories</h2>
-        <Button onClick={() => setIsCreateDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Category
-        </Button>
-      </div>
+      <h2 className="text-2xl font-semibold">Menu Categories</h2>
 
-      <div className="flex gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <Input
-            placeholder="Search categories and items..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-          />
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => setExpandedCategories(prev => !prev)}
+        >
+          {expandedCategories ? (
+            <>
+              <ChevronUp className="mr-1 h-3 w-3" />
+              Collapse All
+            </>
+          ) : (
+            <>
+              <ChevronDown className="mr-1 h-3 w-3" />
+              Expand All
+            </>
+          )}
+        </Button>
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              placeholder="Find items, categories..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 w-full"
+            />
+          </div>
+          <Button onClick={() => setIsCreateDialogOpen(true)} className="w-full sm:w-auto">
+            <Plus className="mr-2 h-4 w-4" />
+            Add Category
+          </Button>
         </div>
       </div>
 
@@ -225,6 +243,7 @@ export function MenuDetails() {
         categories={categories} 
         setCategories={setCategories}
         searchQuery={searchQuery}
+        expandedCategories={expandedCategories}
       />
 
       <CreateCategoryDialog
