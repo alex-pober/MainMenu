@@ -28,6 +28,19 @@ export const metadata = {
     title: 'MainMenu.io - Digital Menu Solutions',
     description: 'Transform your restaurant menu into an interactive digital experience.',
   },
+  icons: {
+    icon: [
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' }
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }
+    ],
+    other: [
+      { rel: 'apple-touch-icon', url: '/apple-touch-icon.png' },
+      { rel: 'manifest', url: '/manifest.json' }
+    ]
+  }
 };
 
 export default function RootLayout({
