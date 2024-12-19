@@ -34,9 +34,28 @@ export function EditItemDialog({
   const [formData, setFormData] = useState<Partial<MenuItem>>({});
   const { toast } = useToast();
 
-  // Update form data when item changes or dialog opens
+  const defaultFormState = {
+    name: '',
+    description: '',
+    price: 0,
+    is_available: true,
+    is_spicy: false,
+    is_new: false,
+    is_limited_time: false,
+    is_most_popular: false,
+    is_special: false,
+    is_vegan: false,
+    is_vegetarian: false,
+    addons: []
+  };
+
+  // Reset state when dialog opens or closes
   useEffect(() => {
-    if (open && item) {
+    if (open) {
+      // Initialize state when dialog opens
+      setImageFiles(item?.image_urls || []);
+      setNewFiles([]);
+      setPreviewUrls([]);
       setFormData({
         name: item.name,
         description: item.description,
@@ -51,8 +70,17 @@ export function EditItemDialog({
         is_vegetarian: item.is_vegetarian || false,
         addons: item.addons || []
       });
+    } else {
+      // Cleanup state when dialog closes
+      setImageFiles([]);
+      setNewFiles([]);
+      setPreviewUrls(prevUrls => {
+        prevUrls.forEach(url => URL.revokeObjectURL(url));
+        return [];
+      });
+      setFormData(defaultFormState);
     }
-  }, [item, open]);
+  }, [open, item]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {

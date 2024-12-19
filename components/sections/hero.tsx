@@ -15,7 +15,7 @@ export function HeroSection() {
         <div className="absolute inset-0 " />
       </div>
       
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center mt-0 ">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center mt-0 ">
         <div className="space-y-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -24,7 +24,7 @@ export function HeroSection() {
             className="space-y-8"
           >
             
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
+            <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
               The Ultimate{' '}
               <span className="bg-gradient-to-r from-[#FD851C] to-[#FD851C] bg-clip-text text-transparent inline-block">Mobile Menu</span>
               {' '}<span className="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Experience</span>
@@ -72,7 +72,7 @@ export function HeroSection() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="relative mt-16 mx-auto max-w-3xl"
+            className="relative mt-16 mx-auto max-w-7xl"
           >
             {/* <div className="absolute inset-0 -z-10 bg-gradient-to-b from-[#FD851C]/20 via-[#FD851C]/10 to-transparent rounded-2xl transform scale-105 blur-2xl" />
             <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#FD851C]/10 via-white to-[#FD851C]/10 rounded-2xl transform scale-105 blur-xl" /> */}

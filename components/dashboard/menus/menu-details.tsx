@@ -14,6 +14,7 @@ import { getMenuDetails } from '@/lib/services/menu-service';
 import { createBrowserClient } from '@supabase/ssr';
 import type { Menu, MenuCategory } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
+import { Textarea } from '@/components/ui/textarea';
 
 export function MenuDetails() {
   const params = useParams();
@@ -136,9 +137,9 @@ export function MenuDetails() {
   return (
     <div className="space-y-4">
       <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-          <div className="flex-1 flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
+        <div className="flex flex-col sm:flex-row sm:items-start gap-4 outline outline-4 outline-[#f5f5f5] p-4 rounded-lg w-fu">
+          <div className="flex-1 flex items-center flex-col gap-4">
+            <div className="flex-1 w-full">
               <Label htmlFor="name">Menu Name</Label>
               <Input
                 id="name"
@@ -146,32 +147,35 @@ export function MenuDetails() {
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 w-full">
               <Label htmlFor="description">Description</Label>
-              <Input
+              <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               />
             </div>
+
           </div>
-          <Button onClick={handleSave} disabled={isSaving} className="w-full sm:w-auto">
-            <Save className="mr-2 h-4 w-4" />
-            {isSaving ? "Saving..." : "Save Changes"}
-          </Button>
+          <div className='flex align-center flex-col gap-4 justify-evenly m-auto'>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="availability" className="mb-0">Always Available</Label>
+              <Switch
+                id="availability"
+                checked={formData.is_always_available}
+                onCheckedChange={(checked) => 
+                  setFormData({ ...formData, is_always_available: checked })
+                }
+              />
+            </div>
+            <Button onClick={handleSave} disabled={isSaving} className="w-full sm:w-auto">
+              <Save className="mr-2 h-4 w-4" />
+              {isSaving ? "Saving..." : "Save Changes"}
+            </Button>
+          </div>
         </div>
 
         <div className="flex items-center gap-4 max-w-3xl">
-          <div className="flex items-center gap-2">
-            <Label htmlFor="availability" className="mb-0">Always Available</Label>
-            <Switch
-              id="availability"
-              checked={formData.is_always_available}
-              onCheckedChange={(checked) => 
-                setFormData({ ...formData, is_always_available: checked })
-              }
-            />
-          </div>
           
           {!formData.is_always_available && (
             <div className="flex gap-4 items-center flex-1">

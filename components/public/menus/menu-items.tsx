@@ -32,14 +32,22 @@ export function MenuItems({ categories }: MenuItemsProps) {
               >
                 {item.image_urls?.[0] && (
                   <div 
-                    className="relative flex-shrink-0 w-20 h-20 cursor-pointer"
+                    className="relative flex-shrink-0 cursor-pointer"
                     onClick={() => setSelectedImage(item.image_urls[0])}
+                    style={{
+                      width: '80px',  
+                      aspectRatio: '1/1',
+                    }}
                   >
                     <Image
                       src={item.image_urls[0]}
                       alt={item.name}
                       fill
+                      sizes="80px"
                       className="object-cover rounded-md"
+                      style={{
+                        objectPosition: 'center center'
+                      }}
                     />
                   </div>
                 )}

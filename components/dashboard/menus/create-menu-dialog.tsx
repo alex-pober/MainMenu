@@ -54,13 +54,25 @@ export function CreateMenuDialog({ open, onOpenChange }: CreateMenuDialogProps) 
         .insert([
           {
             ...formData,
-            user_id: user.id
+            user_id: user.id,
+            display_order: 0  // Set initial display_order to 0
           }
         ])
         .select()
         .single();
 
       if (error) throw error;
+
+      // Update display_order of all other menus
+      const { error: updateError } = await supabase
+        .rpc('increment_menu_order', {
+          excluded_menu_id: data.id,
+          user_id_param: user.id
+        });
+
+      if (updateError) {
+        console.log('Error updating other menus display_order:', updateError);
+      }
 
       // Add the new menu to the context
       addMenu(data);

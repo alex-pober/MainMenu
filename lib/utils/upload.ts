@@ -20,9 +20,11 @@ export async function uploadImages(imageFiles: File[]): Promise<string[]> {
 
     const uploadPromises = imageFiles.map(async (file) => {
       try {
-        // Validate file type
-        if (!file.type.startsWith('image/')) {
-          throw new Error('Invalid file type. Only images are allowed.');
+        // Validate file type with explicit WebP support
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        if (!allowedTypes.includes(file.type)) {
+          console.error('Invalid file type:', file.type);
+          throw new Error(`Invalid file type. Allowed types are: ${allowedTypes.join(', ')}`);
         }
 
         // Validate file size (10MB limit)
