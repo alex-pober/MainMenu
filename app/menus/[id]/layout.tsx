@@ -3,13 +3,14 @@ import { createClient } from '@/lib/supabase/server';
 import Page from "./page";
 
 type Props = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params;
   const supabase = await createClient();
   const {id} = params
-  
+
   try {
     const { data: profile } = await supabase
       .from('restaurant_profiles')
@@ -94,9 +95,10 @@ async function fetchMenuData(userId: string) {
   }
 }
 
-export default async function PageLayout({ params }: Props) {
+export default async function PageLayout(props: Props) {
+  const params = await props.params;
   const {id} = params;
   const data = await fetchMenuData(id);
-  
+
   return <Page initialData={data} />;
 }

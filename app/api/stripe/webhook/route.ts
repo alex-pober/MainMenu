@@ -21,7 +21,7 @@ const relevantEvents = new Set([
 export async function POST(req: Request) {
   const body = await req.text()
   // @ts-ignore
-  const sig = headers().get('stripe-signature')
+  const sig = (await headers()).get('stripe-signature')
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
 
   console.log('Webhook request received:', {

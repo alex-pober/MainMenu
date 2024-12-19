@@ -228,7 +228,7 @@ export function MenuDetails({
             >
               <CardContent className="p-6">
                 <div className="flex justify-between items-center gap-4">
-                  <div className="space-y-1.5">
+                  <div className="space-y-1">
                     <h4 className="text-xl font-semibold leading-none">
                       {category.name}
                     </h4>
@@ -300,7 +300,6 @@ export function MenuDetails({
                   >
                     {item.image_urls?.[0] && (
                       <div className="w-full mb-4">
-                      
                         <div
                           className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-muted"
                           onTouchStart={(e) => onTouchStart(e, true)}
@@ -351,19 +350,22 @@ export function MenuDetails({
                                   />
                                 ))}
                               </div>
-                              <div className="hidden sm:block z-20">
+                              <div className="absolute inset-0 hidden sm:flex items-center justify-between px-2 z-30">
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/40 text-white rounded-full"
+                                  className="bg-black/30 hover:bg-black/40 text-white rounded-full"
                                   onClick={(e) => {
+                                    e.preventDefault();
                                     e.stopPropagation();
                                     if (currentImageIndex > 0) {
                                       setCurrentImageIndex((prev) => prev - 1);
-                                      console.log(
-                                        "Navigation: Previous image",
-                                        { currentIndex: currentImageIndex - 1 }
-                                      );
+                                      console.log("Image Navigation:", {
+                                        action: "Previous",
+                                        previousIndex: currentImageIndex,
+                                        newIndex: currentImageIndex - 1,
+                                        totalImages: item.image_urls.length
+                                      });
                                     }
                                   }}
                                   disabled={currentImageIndex === 0}
@@ -373,16 +375,20 @@ export function MenuDetails({
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/40 text-white rounded-full"
+                                  className="bg-black/30 hover:bg-black/40 text-white rounded-full"
                                   onClick={(e) => {
+                                    e.preventDefault();
                                     e.stopPropagation();
                                     if (
                                       currentImageIndex <
                                       item.image_urls.length - 1
                                     ) {
                                       setCurrentImageIndex((prev) => prev + 1);
-                                      console.log("Navigation: Next image", {
-                                        currentIndex: currentImageIndex + 1,
+                                      console.log("Image Navigation:", {
+                                        action: "Next",
+                                        previousIndex: currentImageIndex,
+                                        newIndex: currentImageIndex + 1,
+                                        totalImages: item.image_urls.length
                                       });
                                     }
                                   }}
@@ -397,7 +403,6 @@ export function MenuDetails({
                             </>
                           )}
                         </div>
-
                       </div>
                     )}
                     <div className="space-y-1">
