@@ -15,6 +15,7 @@ import { createBrowserClient } from '@supabase/ssr';
 import type { Menu, MenuCategory } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
+import { createClient } from '@/lib/supabase/client';
 
 export function MenuDetails() {
   const params = useParams();
@@ -54,10 +55,8 @@ export function MenuDetails() {
 
     try {
       setIsSaving(true);
-      const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
+      const supabase = await createClient()
+
       const { data, error } = await supabase
         .from('menus')
         .update({
@@ -95,10 +94,7 @@ export function MenuDetails() {
 
       try {
         setIsLoading(true);
-        const supabase = createBrowserClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-        );
+        const supabase = await createClient()
         const { menu, categories } = await getMenuDetails(params.id as string, supabase);
         setMenu(menu);
         setCategories(categories);

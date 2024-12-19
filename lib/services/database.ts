@@ -1,9 +1,10 @@
 // @ts-nocheck
 
-import { supabase } from '../supabase';
 import { Menu, MenuCategory, MenuItem } from '../types';
+import { createClient } from '../supabase/client';
 
 export async function getMenu(menuId: string): Promise<Menu> {
+  const supabase = createClient();
   try {
     const { data, error } = await supabase
       .from('menus')
@@ -22,6 +23,7 @@ export async function getMenu(menuId: string): Promise<Menu> {
 }
 
 export async function getMenuCategories(menuId: string): Promise<MenuCategory[]> {
+  const supabase = createClient();
   try {
     const { data, error } = await supabase
       .from('menu_categories')
@@ -38,6 +40,7 @@ export async function getMenuCategories(menuId: string): Promise<MenuCategory[]>
 }
 
 export async function getMenuItems(categoryId: string): Promise<MenuItem[]> {
+  const supabase = createClient();
   try {
     const { data, error } = await supabase
       .from('menu_items')

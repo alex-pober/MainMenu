@@ -1,6 +1,8 @@
-import { supabase } from '@/lib/supabase';
+import { createClient } from '../supabase/client';
+
 
 export async function setupStoragePolicies() {
+  const supabase = createClient();
   // Skip setup if environment variables are not available (e.g., during build)
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
     console.log('Skipping storage policies setup: Missing environment variables');

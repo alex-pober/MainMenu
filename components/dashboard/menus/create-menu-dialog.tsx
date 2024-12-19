@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { createBrowserClient } from '@supabase/ssr';
 import { useMenus } from '@/lib/context/menu-context';
+import {createClient} from '@/lib/supabase/client';
 import type { CreateMenuInput } from '@/lib/types';
 
 interface CreateMenuDialogProps {
@@ -35,10 +36,11 @@ export function CreateMenuDialog({ open, onOpenChange }: CreateMenuDialogProps) 
     setIsLoading(true);
 
     try {
-      const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
+      const supabase = await createClient();
+      // const supabase = createBrowserClient(
+      //   process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      //   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      // );
 
       const {
         data: { user },

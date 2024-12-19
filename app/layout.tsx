@@ -55,7 +55,7 @@ export default function RootLayout({
           <Navigation />
           <main>{children}</main>
           <Toaster />
-          <StoragePoliciesSetup />
+          {/* <StoragePoliciesSetup /> */}
         </ErrorBoundary>
         <Analytics />
       </body>
