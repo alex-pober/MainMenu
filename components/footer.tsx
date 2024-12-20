@@ -50,11 +50,6 @@ export function Footer() {
                   Pricing
                 </Link>
               </li>
-              <li>
-                <Link href="#" className="text-foreground/60 hover:text-foreground">
-                  Case Studies
-                </Link>
-              </li>
             </ul>
           </div>
 
@@ -71,32 +66,27 @@ export function Footer() {
                   Blog
                 </Link>
               </li>
-              <li>
-                <Link href="#" className="text-foreground/60 hover:text-foreground">
-                  Careers
-                </Link>
-              </li>
             </ul>
           </div>
 
           <div>
             <h3 className="text-lg font-semibold mb-4">Support</h3>
             <ul className="space-y-2">
-              <li>
+              {/* <li>
                 <Link href="#" className="text-foreground/60 hover:text-foreground">
                   Help Center
                 </Link>
-              </li>
+              </li> */}
               <li>
                 <Link href="#" className="text-foreground/60 hover:text-foreground">
                   Contact
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link href="#" className="text-foreground/60 hover:text-foreground">
                   Privacy Policy
                 </Link>
-              </li>
+              </li> */}
             </ul>
           </div>
         </div>

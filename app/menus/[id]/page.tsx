@@ -92,7 +92,7 @@ export default function MenuPage({ initialData }: { initialData: InitialData }) 
               </div>
             </div>
           ) : (
-            <div className="relative py-16 sm:py-24 text-center w-full flex-col items-center justify-center overflow-hidden rounded-lg bg-background ">
+            <div className="relative py-16 sm:py-24 text-center w-full flex-col items-center justify-center overflow-hidden rounded-lg bg-transparent ">
               <DotPattern 
                 className={cn(
                   "[mask-image:radial-gradient(300px_80px_ellipse_at_center,white,transparent)]"

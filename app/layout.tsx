@@ -37,7 +37,6 @@ export const metadata = {
       { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }
     ],
     other: [
-      { rel: 'apple-touch-icon', url: '/apple-touch-icon.png' },
       { rel: 'manifest', url: '/manifest.json' }
     ]
   }

@@ -59,7 +59,7 @@ const FeatureShowcase = () => {
           >
             <div className="relative">
               <Image
-                src="/images/create-menu-feature2.webp"
+                src="/images/menu-item-edit-color.webp"
                 alt="Menu Creation Feature"
                 width={800}
                 height={600}
@@ -71,8 +71,8 @@ const FeatureShowcase = () => {
             <div className="space-y-4 max-w-md">
               <h3 className="text-3xl font-bold">Effortless Menu Customization</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Create unlimited menus, toggle them on/off, or schedule when diners see them—simple and flexible!
-              </p>
+                Easily create unlimited menus, items, and specials. Customize with add-ons, toggle availability with a click, and explore even more features.             
+               </p>
             </div>
           </motion.div>
 
@@ -85,14 +85,14 @@ const FeatureShowcase = () => {
             className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center"
           >
             <div className="space-y-4 max-w-md">
-              <h3 className="text-3xl font-bold">Categories and Items</h3>
+              <h3 className="text-3xl font-bold">Dashboard for Your Menu</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Every menu is set up with categories and items, making it easy to navigate and prevent endless scrolling for diners.
+              Streamline your restaurant’s operations with an all-in-one dashboard. Edit everything from one place.
               </p>
             </div>
             <div className="relative">
               <Image
-                src="/images/digital-menu-with-categories.webp"
+                src="/images/dashboard-demo.webp"
                 alt="Menu Creation Feature"
                 width={800}
                 height={600}
@@ -112,7 +112,7 @@ const FeatureShowcase = () => {
           >
             <div className="relative">
               <Image
-                src="/images/menu-item-customization.webp"
+                src="/images/633shots_so.png"
                 alt="Menu Creation Feature"
                 width={800}
                 height={600}
@@ -121,10 +121,9 @@ const FeatureShowcase = () => {
               />
             </div>
             <div className="space-y-4 max-w-md">
-              <h3 className="text-3xl font-bold">Item Customization</h3>
+              <h3 className="text-3xl font-bold">Designed for Mobile, Loved by Diners</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Every menu item customized to display everything you want, including images, descriptions, and prices.
-              </p>
+              Deliver a seamless digital menu experience with a mobile-first design. Easy navigation, fast loading, and an intuitive interface ensure your diners enjoy every interaction.              </p>
             </div>
           </motion.div>
         </div>
@@ -134,62 +133,9 @@ const FeatureShowcase = () => {
 };
 
 export function FeaturesSection() {
-  const [ref, inView] = useInView({
-    triggerOnce: true,
-    threshold: 0.1
-  });
-
   return (
     <>
       <FeatureShowcase />
-      <section id="features" className="py-24 bg-muted/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-16"
-          >
-            <motion.h2 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-3xl font-bold mb-4"
-            >
-              Powerful Features for Modern Restaurants
-            </motion.h2>
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-lg text-muted-foreground max-w-2xl mx-auto"
-            >
-              Everything you need to digitize your menu and enhance your customers&apos; dining experience.
-            </motion.p>
-          </motion.div>
-
-          <div ref={ref} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => (
-              <motion.div
-                key={feature.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-              >
-                <Card className="h-full">
-                  <CardHeader>
-                    <div className="mb-4 w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <feature.icon className="w-6 h-6 text-primary" />
-                    </div>
-                    <CardTitle>{feature.title}</CardTitle>
-                    <CardDescription>{feature.description}</CardDescription>
-                  </CardHeader>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
     </>
   );
 }

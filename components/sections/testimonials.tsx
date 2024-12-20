@@ -11,14 +11,14 @@ const testimonials = [
     name: "Sarah Johnson",
     role: "Restaurant Owner",
     image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
-    content: "MainMenu.io transformed how we handle our menu. Our customers love the digital experience, and we've seen a 25% increase in orders since implementing it.",
+    content: "MainMenu.io transformed how we handle our menu. Our customers love the digital experience, and we've seen a increase in orders since diners always have access to our menu.",
     restaurant: "The Rustic Table"
   },
   {
     name: "Michael Chen",
     role: "Executive Chef",
     image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e",
-    content: "The ability to update our menu in real-time has been game-changing. We can adjust prices and availability instantly, and the analytics help us make better decisions.",
+    content: "The ability to update our menu in real-time has been game-changing. We can adjust prices and availability instantly, saving us time and effort.",
     restaurant: "Fusion Kitchen"
   },
   {
@@ -64,7 +64,7 @@ export function TestimonialsSection() {
                       <Star key={i} className="w-5 h-5 fill-primary text-primary" />
                     ))}
                   </div>
-                  <p className="mb-6 text-muted-foreground">{testimonial.content}</p>
+                  <p className="mb-6 text-muted-foreground min-h-28">{testimonial.content}</p>
                   <div className="flex items-center">
                     <div className="relative w-12 h-12 rounded-full overflow-hidden mr-4">
                       <Image
