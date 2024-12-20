@@ -1,32 +1,41 @@
 "use client";
 
-import { motion } from 'framer-motion';
-import { useInView } from 'react-intersection-observer';
-import { QrCode, BarChart3, RefreshCcw, Smartphone } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import Image from 'next/image';
+import { motion } from "framer-motion";
+import { useInView } from "react-intersection-observer";
+import { QrCode, BarChart3, RefreshCcw, Smartphone } from "lucide-react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import Image from "next/image";
 
 const features = [
   {
     title: "QR Code Integration",
-    description: "Generate unique QR codes for instant menu access. Customers can scan and browse your menu on their devices.",
-    icon: QrCode
+    description:
+      "Generate unique QR codes for instant menu access. Customers can scan and browse your menu on their devices.",
+    icon: QrCode,
   },
   {
     title: "Real-time Updates",
-    description: "Update prices, items, and specials instantly. Changes reflect immediately across all digital menus.",
-    icon: RefreshCcw
+    description:
+      "Update prices, items, and specials instantly. Changes reflect immediately across all digital menus.",
+    icon: RefreshCcw,
   },
   {
     title: "Powerful Analytics",
-    description: "Track viewing patterns, popular items, and customer behavior to optimize your menu and pricing.",
-    icon: BarChart3
+    description:
+      "Track viewing patterns, popular items, and customer behavior to optimize your menu and pricing.",
+    icon: BarChart3,
   },
   {
     title: "Mobile Optimized",
-    description: "Beautiful, responsive design ensures your menu looks perfect on any device, from phones to tablets.",
-    icon: Smartphone
-  }
+    description:
+      "Beautiful, responsive design ensures your menu looks perfect on any device, from phones to tablets.",
+    icon: Smartphone,
+  },
 ];
 
 const FeatureShowcase = () => {
@@ -55,7 +64,7 @@ const FeatureShowcase = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={inView1 ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center"
+            className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center"
           >
             <div className="relative">
               <Image
@@ -68,11 +77,16 @@ const FeatureShowcase = () => {
                 quality={90}
               />
             </div>
-            <div className="space-y-4 max-w-md">
-              <h3 className="text-3xl font-bold">Effortless Menu Customization</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Easily create unlimited menus, items, and specials. Customize with add-ons, toggle availability with a click, and explore even more features.             
-               </p>
+
+            <div className="space-y-4 max-w-md sm:max-w-lg lg:max-w-xl px-4 sm:px-6">
+              <h3 className="text-3xl sm:text-4xl font-bold">
+                Effortless Menu Customization
+              </h3>
+              <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 leading-relaxed">
+                Easily create unlimited menus, items, and specials. Customize
+                with add-ons, toggle availability with a click, and explore even
+                more features.
+              </p>
             </div>
           </motion.div>
 
@@ -82,12 +96,13 @@ const FeatureShowcase = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={inView2 ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center"
+            className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center"
           >
-            <div className="space-y-4 max-w-md">
-              <h3 className="text-3xl font-bold">Dashboard for Your Menu</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-              Streamline your restaurant’s operations with an all-in-one dashboard. Edit everything from one place.
+            <div className="space-y-4 max-w-md sm:max-w-lg lg:max-w-xl px-4 sm:px-6">
+              <h3 className="text-3xl sm:text-4xl font-bold">Dashboard for Your Menu</h3>
+              <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 leading-relaxed">
+                Streamline your restaurant’s operations with an all-in-one
+                dashboard. Edit everything from one place.
               </p>
             </div>
             <div className="relative">
@@ -108,7 +123,7 @@ const FeatureShowcase = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={inView3 ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center"
+            className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center"
           >
             <div className="relative">
               <Image
@@ -120,10 +135,19 @@ const FeatureShowcase = () => {
                 quality={90}
               />
             </div>
-            <div className="space-y-4 max-w-md">
-              <h3 className="text-3xl font-bold">Designed for Mobile, Loved by Diners</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-              Deliver a seamless digital menu experience with a mobile-first design. Easy navigation, fast loading, and an intuitive interface ensure your diners enjoy every interaction.              </p>
+            <div className="space-y-4 max-w-md sm:max-w-lg lg:max-w-xl px-4 sm:px-6">
+              <h3 className="text-3xl sm:text-4xl font-bold">
+                Designed for Mobile,
+                <br />
+                <span className="text-[#FD851C] font-extrabold">
+                  Loved by Diners ❤️
+                </span>
+              </h3>
+              <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 leading-relaxed">
+                Deliver a seamless digital menu experience with a mobile-first
+                design. Easy navigation, fast loading, and an intuitive
+                interface ensure your diners enjoy every interaction.{" "}
+              </p>
             </div>
           </motion.div>
         </div>
