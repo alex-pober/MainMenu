@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { supabase } from '../supabase';
 import { Menu, MenuCategory, MenuItem } from '../types';
+import { createClient } from '../supabase/client';
 import * as db from './database';
 
 export async function getMenuDetails(menuId: string): Promise<{
@@ -25,6 +25,7 @@ export async function getCategoryWithItems(categoryId: string): Promise<{
   items: MenuItem[];
 }> {
   try {
+    const supabase = createClient();
     const { data: category, error: categoryError } = await supabase
       .from('menu_categories')
       .select('*')

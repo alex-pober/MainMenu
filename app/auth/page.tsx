@@ -128,7 +128,7 @@ export default function AuthPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <Card className="w-full max-w-md">
+        <Card className="w-full min-w-96 max-w-md">
           <CardHeader>
             <CardTitle>Welcome to MainMenu</CardTitle>
             <CardDescription>

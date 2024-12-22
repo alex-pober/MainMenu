@@ -1,16 +1,13 @@
 // @ts-nocheck
-import { createBrowserClient } from '@supabase/ssr';
 import { MenuItem } from '@/lib/types';
 import { uploadImages, deleteImage } from '@/lib/utils/upload';
+import {createClient} from '@/lib/supabase/client';
 
 const getSupabaseClient = () => {
-  const client = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-  
+  const supabase = createClient();
+
   // Log authentication state
-  client.auth.getSession().then(({ data: { session }}) => {
+  supabase.auth.getSession().then(({ data: { session }}) => {
     if (session?.user) {
       console.log('[MenuItems Service] Authenticated user:', session.user.id);
     } else {
@@ -18,7 +15,7 @@ const getSupabaseClient = () => {
     }
   });
   
-  return client;
+  return supabase;
 };
 
 export async function updateMenuItem(

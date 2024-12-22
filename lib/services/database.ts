@@ -1,5 +1,4 @@
 // @ts-nocheck
-
 import { Menu, MenuCategory, MenuItem } from '../types';
 import { createClient } from '../supabase/client';
 

@@ -79,15 +79,6 @@
   100% { transform: translateX(0); }
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
-
 [data-vaul-drawer-wrapper] {
   position: absolute !important;
   z-index: 100;
