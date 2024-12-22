@@ -1,5 +1,4 @@
-"use client";
-
+'use client';
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { QrCode, BarChart3, RefreshCcw, Smartphone } from "lucide-react";

@@ -302,7 +302,6 @@ export function MenuCategoryList({ categories, setCategories, searchQuery, expan
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => handleCategoryToggle(category.id)}
-                                className="hover:text-primary"
                               >
                                 {expandedStates[category.id] ? (
                                   <ChevronDown className="h-4 w-4" />
@@ -329,14 +328,14 @@ export function MenuCategoryList({ categories, setCategories, searchQuery, expan
                                   setSelectedCategory(category);
                                   setIsCreateItemDialogOpen(true);
                                 }}
-                                className="transition-all hover:border-primary hover:text-primary whitespace-nowrap"
+                                className="transition-all whitespace-nowrap"
                               >
                                 <Plus className="mr-2 h-4 w-4" />
                                 Add Item
                               </Button>
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="hover:text-primary">
+                                  <Button variant="ghost" size="icon">
                                     <MoreVertical className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
