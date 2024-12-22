@@ -13,8 +13,8 @@ export function PricingSection() {
   });
 
   return (
-    <section id="pricing" className="relative min-h-screen flex items-center justify-center py-16">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="pricing" className="flex items-center py-8">
+      <div className="max-w-6xl mx-auto sm:px-6 lg:px-8">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
