@@ -52,6 +52,7 @@
     "framer-motion": "^11.0.8",
     "gray-matter": "^4.0.3",
     "input-otp": "^1.0.1",
+    "jspdf": "^2.5.2",
     "lucide-react": "^0.350.0",
     "next": "^15.0.0",
     "next-auth": "^4.24.5",

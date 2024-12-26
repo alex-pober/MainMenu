@@ -12,119 +12,58 @@ import { ItemFilter } from './item-filter';
 interface MenuTabsProps {
   userId: string;
 }
-
-export function MenuTabs({ userId }: MenuTabsProps) {
-  const [menus, setMenus] = useState<Menu[]>([]);
+//@ts-ignore
+export function MenuTabs({ userId, menus, profile }: MenuTabsProps) {
   const [categories, setCategories] = useState<Record<string, MenuCategory[]>>({});
-  const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const [activeMenu, setActiveMenu] = useState<string | null>(menus[0].id);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [availableLabels, setAvailableLabels] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const supabase = createClientComponentClient();
 
   useEffect(() => {
-    const fetchMenus = async () => {
-      try {
-        const { data: menuData, error: menuError } = await supabase
-          .from('menus')
-          .select(`
-            id,
-            user_id,
-            name,
-            description,
-            status,
-            display_order,
-            is_always_available,
-            available_start_time,
-            available_end_time,
-            created_at,
-            updated_at,
-            menu_categories (
-              id,
-              menu_id,
-              name,
-              description,
-              sort_order,
-              created_at,
-              updated_at,
-              menu_items (
-                id,
-                category_id,
-                name,
-                description,
-                price,
-                image_urls,
-                addons,
-                is_available,
-                is_spicy,
-                is_new,
-                is_limited_time,
-                is_most_popular,
-                is_special,
-                is_vegan,
-                is_vegetarian,
-                sort_order,
-                created_at,
-                updated_at
-              )
-            )
-          `)
-          .eq('user_id', userId)
-          .eq('status', 'active')
-          .order('display_order', { ascending: true });
-
-        if (menuError) throw menuError;
-
-        if (menuData && menuData.length > 0) {
-          console.log('Menu data fetched:', menuData);
-          setMenus(menuData);
-          const categoriesMap: Record<string, MenuCategory[]> = {};
-          menuData.forEach((menu: Menu) => {
-            if (menu.menu_categories) {
-              console.log('Menu categories for', menu.name, ':', menu.menu_categories);
-              categoriesMap[menu.id] = menu.menu_categories;
-            }
-          });
-          setCategories(categoriesMap);
-          setActiveMenu(menuData[0].id);
-
-          // Organize categories by menu_id and sort them by sort_order
-          const categoriesByMenu: Record<string, MenuCategory[]> = {};
-          const labels = new Set<string>();
-          
-          menuData.forEach(menu => {
-            const sortedCategories = (menu.menu_categories || []).sort(
-              (a, b) => a.sort_order - b.sort_order
-            );
-            
-            // Collect all used labels
-            sortedCategories.forEach(category => {
-              category.menu_items?.forEach(item => {
-                if (item.is_vegan) labels.add('vegan');
-                if (item.is_vegetarian) labels.add('vegetarian');
-                if (item.is_spicy) labels.add('spicy');
-                if (item.is_new) labels.add('new');
-                if (item.is_limited_time) labels.add('limited');
-                if (item.is_most_popular) labels.add('popular');
-                if (item.is_special) labels.add('special');
-              });
-            });
-            
-            categoriesByMenu[menu.id] = sortedCategories;
-          });
-          
-          setCategories(categoriesByMenu);
-          setAvailableLabels(Array.from(labels));
+    if (menus && menus.length > 0) {
+      console.log('Menu data fetched:', menus);
+      // setMenus(menus);
+      const categoriesMap: Record<string, MenuCategory[]> = {};
+      menus.forEach((menu: Menu) => {
+        if (menu.menu_categories) {
+          console.log('Menu categories for', menu.name, ':', menu.menu_categories);
+          categoriesMap[menu.id] = menu.menu_categories;
         }
-      } catch (error) {
-        console.error('Error fetching menus:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+      });
+      setCategories(categoriesMap);
+      setActiveMenu(menus[0].id);
 
-    fetchMenus();
-  }, [userId, supabase]);
+      // Organize categories by menu_id and sort them by sort_order
+      const categoriesByMenu: Record<string, MenuCategory[]> = {};
+      const labels = new Set<string>();
+      
+      menus.forEach(menu => {
+        const sortedCategories = (menu.menu_categories || []).sort(
+          (a, b) => a.sort_order - b.sort_order
+        );
+        
+        // Collect all used labels
+        sortedCategories.forEach(category => {
+          category.menu_items?.forEach(item => {
+            if (item.is_vegan) labels.add('vegan');
+            if (item.is_vegetarian) labels.add('vegetarian');
+            if (item.is_spicy) labels.add('spicy');
+            if (item.is_new) labels.add('new');
+            if (item.is_limited_time) labels.add('limited');
+            if (item.is_most_popular) labels.add('popular');
+            if (item.is_special) labels.add('special');
+          });
+        });
+        
+        categoriesByMenu[menu.id] = sortedCategories;
+      });
+      
+      setCategories(categoriesByMenu);
+      setAvailableLabels(Array.from(labels));
+      setIsLoading(false);
+
+  }}, [menus]);
 
   const handleMenuChange = (value: string) => {
     setActiveMenu(value);

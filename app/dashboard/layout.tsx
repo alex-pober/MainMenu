@@ -15,7 +15,8 @@ import {
   Loader2,
   User,
   QrCode,
-  CreditCard
+  CreditCard,
+  NotebookText
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -37,6 +38,11 @@ const sidebarLinks = [
     title: 'QR Code',
     href: '/dashboard/qr-code',
     icon: QrCode
+  },
+  {
+    title: 'Print Menu',
+    href: '/dashboard/print-menu',
+    icon: NotebookText
   },
   {
     title: 'Subscription',

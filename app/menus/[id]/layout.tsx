@@ -64,7 +64,8 @@ async function fetchMenuData(userId: string) {
           )
         `)
         .eq('user_id', userId)
-        .order('created_at', { ascending: false })
+        .eq('status', 'active')
+        .order('display_order', { ascending: true })
     ]);
 
     if (profileResponse.error) {
@@ -87,7 +88,7 @@ async function fetchMenuData(userId: string) {
 
     return {
       profile: profileResponse.data,
-      menu: activeMenu
+      menu: menusResponse.data
     };
   } catch (error) {
     console.log('Error in fetchMenuData:', error);
@@ -100,5 +101,6 @@ export default async function PageLayout(props: Props) {
   const {id} = params;
   const data = await fetchMenuData(id);
 
-  return <Page initialData={data} />;
+  //@ts-ignore
+  return <Page initialData={data} userID={id} />;
 }

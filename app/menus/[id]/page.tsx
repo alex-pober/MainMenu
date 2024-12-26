@@ -47,7 +47,7 @@ interface InitialData {
   menu: Menu;
 }
 
-export default function MenuPage({ initialData }: { initialData: InitialData }) {
+export default function MenuPage({ initialData, userID }: { initialData: InitialData, userID: string }) {
   const [menu, setMenu] = useState<Menu>(initialData.menu);
   const [profile, setProfile] = useState<RestaurantProfile>(initialData.profile);
   const { toast } = useToast();
@@ -111,7 +111,8 @@ export default function MenuPage({ initialData }: { initialData: InitialData }) 
         </div>
 
         <div className="px-4 sm:px-6 lg:px-8 space-y-6">
-          <MenuTabs userId={profile.user_id} />
+          {/*@ts-ignore*/}
+          <MenuTabs userId={userID} menus={menu} profile={profile}/>
         </div>
       </motion.div>
     </div>
