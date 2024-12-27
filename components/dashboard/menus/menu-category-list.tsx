@@ -353,7 +353,7 @@ export function MenuCategoryList({
 
                               <div className="flex flex-row items-center">
                               <div {...provided.dragHandleProps}>
-                                <GripVertical className="h-4 w-4 text-muted-foreground/40" />
+                                <GripVertical className="h-5 w-5 text-muted-foreground cursor-grab" />
                               </div>
                                 <Button
                                   variant="ghost"
