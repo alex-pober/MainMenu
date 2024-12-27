@@ -1,26 +1,39 @@
 // @ts-nocheck
 "use client";
 
-import { useState, useEffect } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Plus, MoreVertical, ChevronDown, ChevronRight, GripVertical, ChevronUp } from 'lucide-react';
-import { MenuItemList } from './menu-item-list';
-import { CreateItemDialog } from './create-item-dialog';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { useState, useEffect } from "react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Plus,
+  MoreVertical,
+  ChevronDown,
+  ChevronRight,
+  GripVertical,
+  ChevronUp,
+} from "lucide-react";
+import { MenuItemList } from "./menu-item-list";
+import { CreateItemDialog } from "./create-item-dialog";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { createBrowserClient } from '@supabase/ssr';
-import { useToast } from '@/hooks/use-toast';
-import type { MenuCategory, MenuItem } from '@/lib/types';
+} from "@/components/ui/dropdown-menu";
+import { createBrowserClient } from "@supabase/ssr";
+import { useToast } from "@/hooks/use-toast";
+import type { MenuCategory, MenuItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 interface MenuCategoryListProps {
   categories: MenuCategory[];
@@ -29,15 +42,29 @@ interface MenuCategoryListProps {
   expandedCategories: boolean;
 }
 
-export function MenuCategoryList({ categories, setCategories, searchQuery, expandedCategories }: MenuCategoryListProps) {
-  const [selectedCategory, setSelectedCategory] = useState<MenuCategory | null>(null);
+export function MenuCategoryList({
+  categories,
+  setCategories,
+  searchQuery,
+  expandedCategories,
+}: MenuCategoryListProps) {
+  const [selectedCategory, setSelectedCategory] = useState<MenuCategory | null>(
+    null
+  );
   const [isCreateItemDialogOpen, setIsCreateItemDialogOpen] = useState(false);
-  const [isRenameCategoryDialogOpen, setIsRenameCategoryDialogOpen] = useState(false);
-  const [categoryToRename, setCategoryToRename] = useState<MenuCategory | null>(null);
+  const [isRenameCategoryDialogOpen, setIsRenameCategoryDialogOpen] =
+    useState(false);
+  const [categoryToRename, setCategoryToRename] = useState<MenuCategory | null>(
+    null
+  );
   const [newCategoryName, setNewCategoryName] = useState("");
   const [newCategoryDescription, setNewCategoryDescription] = useState("");
-  const [categoryItems, setCategoryItems] = useState<Record<string, MenuItem[]>>({});
-  const [expandedStates, setExpandedStates] = useState<Record<string, boolean>>({});
+  const [categoryItems, setCategoryItems] = useState<
+    Record<string, MenuItem[]>
+  >({});
+  const [expandedStates, setExpandedStates] = useState<Record<string, boolean>>(
+    {}
+  );
   const { toast } = useToast();
 
   // Fetch items for all categories when component mounts or categories change
@@ -49,21 +76,27 @@ export function MenuCategoryList({ categories, setCategories, searchQuery, expan
           process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
         );
         const { data, error } = await supabase
-          .from('menu_items')
-          .select('*')
-          .in('category_id', categories.map(c => c.id))
-          .order('sort_order');
+          .from("menu_items")
+          .select("*")
+          .in(
+            "category_id",
+            categories.map((c) => c.id)
+          )
+          .order("sort_order");
 
         if (error) throw error;
 
         // Group items by category
-        const itemsByCategory = data.reduce((acc: Record<string, MenuItem[]>, item) => {
-          if (!acc[item.category_id]) {
-            acc[item.category_id] = [];
-          }
-          acc[item.category_id].push(item);
-          return acc;
-        }, {});
+        const itemsByCategory = data.reduce(
+          (acc: Record<string, MenuItem[]>, item) => {
+            if (!acc[item.category_id]) {
+              acc[item.category_id] = [];
+            }
+            acc[item.category_id].push(item);
+            return acc;
+          },
+          {}
+        );
 
         setCategoryItems(itemsByCategory);
       } catch (error: any) {
@@ -82,10 +115,13 @@ export function MenuCategoryList({ categories, setCategories, searchQuery, expan
 
   // Update expanded states when expandedCategories prop changes
   useEffect(() => {
-    const newExpandedState = categories.reduce((acc, category) => ({
-      ...acc,
-      [category.id]: expandedCategories
-    }), {});
+    const newExpandedState = categories.reduce(
+      (acc, category) => ({
+        ...acc,
+        [category.id]: expandedCategories,
+      }),
+      {}
+    );
     setExpandedStates(newExpandedState);
   }, [expandedCategories, categories]);
 
@@ -113,10 +149,10 @@ export function MenuCategoryList({ categories, setCategories, searchQuery, expan
       // Update each category's sort_order in the database
       for (const item of updatedItems) {
         const { error } = await supabase
-          .from('menu_categories')
+          .from("menu_categories")
           .update({ sort_order: item.sort_order })
-          .eq('id', item.id);
-        
+          .eq("id", item.id);
+
         if (error) throw error;
       }
 
@@ -140,14 +176,16 @@ export function MenuCategoryList({ categories, setCategories, searchQuery, expan
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
       );
       const { error } = await supabase
-        .from('menu_categories')
+        .from("menu_categories")
         .delete()
-        .eq('id', categoryId);
+        .eq("id", categoryId);
 
       if (error) throw error;
 
-      setCategories(categories.filter(category => category.id !== categoryId));
-      
+      setCategories(
+        categories.filter((category) => category.id !== categoryId)
+      );
+
       // Remove items for the deleted category
       const newCategoryItems = { ...categoryItems };
       delete newCategoryItems[categoryId];
@@ -167,17 +205,19 @@ export function MenuCategoryList({ categories, setCategories, searchQuery, expan
   };
 
   const handleItemCreated = (categoryId: string, newItem: MenuItem) => {
-    setCategoryItems(prevItems => ({
+    setCategoryItems((prevItems) => ({
       ...prevItems,
-      [categoryId]: [...(prevItems[categoryId] || []), newItem].sort((a, b) => a.sort_order - b.sort_order)
+      [categoryId]: [...(prevItems[categoryId] || []), newItem].sort(
+        (a, b) => a.sort_order - b.sort_order
+      ),
     }));
   };
 
   const handleItemsUpdated = async (categoryId: string, items: MenuItem[]) => {
     // Update local state immediately for responsiveness
-    setCategoryItems(prevItems => ({
+    setCategoryItems((prevItems) => ({
       ...prevItems,
-      [categoryId]: items.sort((a, b) => a.sort_order - b.sort_order)
+      [categoryId]: items.sort((a, b) => a.sort_order - b.sort_order),
     }));
 
     // Fetch fresh data for all categories
@@ -187,25 +227,31 @@ export function MenuCategoryList({ categories, setCategories, searchQuery, expan
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
       );
       const { data, error } = await supabase
-        .from('menu_items')
-        .select('*')
-        .in('category_id', categories.map(c => c.id))
-        .order('sort_order');
+        .from("menu_items")
+        .select("*")
+        .in(
+          "category_id",
+          categories.map((c) => c.id)
+        )
+        .order("sort_order");
 
       if (error) throw error;
 
       // Group items by category
-      const itemsByCategory = data.reduce((acc: Record<string, MenuItem[]>, item) => {
-        if (!acc[item.category_id]) {
-          acc[item.category_id] = [];
-        }
-        acc[item.category_id].push(item);
-        return acc;
-      }, {});
+      const itemsByCategory = data.reduce(
+        (acc: Record<string, MenuItem[]>, item) => {
+          if (!acc[item.category_id]) {
+            acc[item.category_id] = [];
+          }
+          acc[item.category_id].push(item);
+          return acc;
+        },
+        {}
+      );
 
       setCategoryItems(itemsByCategory);
     } catch (error: any) {
-      console.error('Error refreshing items:', error);
+      console.error("Error refreshing items:", error);
     }
   };
 
@@ -217,23 +263,27 @@ export function MenuCategoryList({ categories, setCategories, searchQuery, expan
       );
 
       const { error } = await supabase
-        .from('menu_categories')
+        .from("menu_categories")
         .update({
           name: newCategoryName,
-          description: newCategoryDescription
+          description: newCategoryDescription,
         })
-        .eq('id', categoryId);
+        .eq("id", categoryId);
 
       if (error) throw error;
 
       // Update local state
-      setCategories(categories.map(cat => 
-        cat.id === categoryId ? { 
-          ...cat, 
-          name: newCategoryName,
-          description: newCategoryDescription 
-        } : cat
-      ));
+      setCategories(
+        categories.map((cat) =>
+          cat.id === categoryId
+            ? {
+                ...cat,
+                name: newCategoryName,
+                description: newCategoryDescription,
+              }
+            : cat
+        )
+      );
 
       toast({
         title: "Success",
@@ -246,31 +296,36 @@ export function MenuCategoryList({ categories, setCategories, searchQuery, expan
       setNewCategoryName("");
       setNewCategoryDescription("");
     } catch (error) {
-      console.error('Error updating category:', error);
+      console.error("Error updating category:", error);
       toast({
         title: "Error",
         description: "Failed to update category",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
 
   const handleCategoryToggle = (categoryId: string) => {
-    setExpandedStates(prev => ({
+    setExpandedStates((prev) => ({
       ...prev,
-      [categoryId]: !prev[categoryId]
+      [categoryId]: !prev[categoryId],
     }));
   };
 
-  const filteredCategories = categories.filter(category => {
-    const categoryMatch = category.name.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredCategories = categories.filter((category) => {
+    const categoryMatch = category.name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
     if (categoryMatch) return true;
-    
+
     // Search through items in this category
     const items = categoryItems[category.id] || [];
-    return items.some(item => 
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (item.description || '').toLowerCase().includes(searchQuery.toLowerCase())
+    return items.some(
+      (item) =>
+        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (item.description || "")
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
     );
   });
 
@@ -279,7 +334,11 @@ export function MenuCategoryList({ categories, setCategories, searchQuery, expan
       <div className="space-y-4">
         <Droppable droppableId="categories">
           {(provided) => (
-            <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-4">
+            <div
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+              className="space-y-4"
+            >
               {filteredCategories.map((category, index) => (
                 <Draggable
                   key={category.id}
@@ -287,90 +346,104 @@ export function MenuCategoryList({ categories, setCategories, searchQuery, expan
                   index={index}
                 >
                   {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                    >
+                    <div ref={provided.innerRef} {...provided.draggableProps}>
                       <Card className="bg-gradient-to-r from-background to-muted border-l-4 border-l-primary/20">
                         <CardHeader>
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                            <div className="flex items-center gap-2">
+                          <div className="flex flex-col gap-4 justify-between">
+
+                              <div className="flex flex-row items-center">
                               <div {...provided.dragHandleProps}>
                                 <GripVertical className="h-4 w-4 text-muted-foreground/40" />
                               </div>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleCategoryToggle(category.id)}
-                              >
-                                {expandedStates[category.id] ? (
-                                  <ChevronDown className="h-4 w-4" />
-                                ) : (
-                                  <ChevronRight className="h-4 w-4" />
-                                )}
-                              </Button>
-                              <div className="space-y-1">
-                                <CardTitle className="text-xl">
-                                  {category.name}
-                                </CardTitle>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() =>
+                                    handleCategoryToggle(category.id)
+                                  }
+                                >
+                                  {expandedStates[category.id] ? (
+                                    <ChevronDown className="h-4 w-4" />
+                                  ) : (
+                                    <ChevronRight className="h-4 w-4" />
+                                  )}
+                                </Button>
+                                <div className="flex flex-row items-center w-full justify-between">
+                                  <CardTitle className="text-xl">
+                                    {category.name}
+                                  </CardTitle>
+
+                                  {/* Add item button and dropdown */}
+                                  <div className="flex flex-row items-center">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        setSelectedCategory(category);
+                                        setIsCreateItemDialogOpen(true);
+                                      }}
+                                      className="transition-all whitespace-nowrap"
+                                    >
+                                      <Plus className="mr-2 h-4 w-4" />
+                                      Add Item
+                                    </Button>
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="icon">
+                                          <MoreVertical className="h-4 w-4" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent align="end">
+                                        <DropdownMenuItem
+                                          onClick={() => {
+                                            setCategoryToRename(category);
+                                            setNewCategoryName(category.name);
+                                            setNewCategoryDescription(
+                                              category.description || ""
+                                            );
+                                            setIsRenameCategoryDialogOpen(true);
+                                          }}
+                                        >
+                                          Edit Category
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                          onClick={() =>
+                                            handleDeleteCategory(category.id)
+                                          }
+                                          className="text-destructive focus:text-destructive"
+                                        >
+                                          Delete
+                                        </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  </div>
+                                </div>
+
+                             
+                            </div>
                                 {category.description && (
                                   <p className="text-sm text-muted-foreground">
                                     {category.description}
                                   </p>
                                 )}
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2 ml-auto">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedCategory(category);
-                                  setIsCreateItemDialogOpen(true);
-                                }}
-                                className="transition-all whitespace-nowrap"
-                              >
-                                <Plus className="mr-2 h-4 w-4" />
-                                Add Item
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon">
-                                    <MoreVertical className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem
-                                    onClick={() => {
-                                      setCategoryToRename(category);
-                                      setNewCategoryName(category.name);
-                                      setNewCategoryDescription(category.description || '');
-                                      setIsRenameCategoryDialogOpen(true);
-                                    }}
-                                  >
-                                    Edit Category
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem 
-                                    onClick={() => handleDeleteCategory(category.id)}
-                                    className="text-destructive focus:text-destructive"
-                                  >
-                                    Delete
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
                           </div>
                         </CardHeader>
-                        <CardContent className={cn(
-                          "grid transition-all",
-                          expandedStates[category.id] ? "grid-rows-[1fr]" : "grid-rows-[0fr] p-0"
-                        )}>
+                        <CardContent
+                          className={cn(
+                            "grid transition-all",
+                            expandedStates[category.id]
+                              ? "grid-rows-[1fr]"
+                              : "grid-rows-[0fr] p-0"
+                          )}
+                        >
                           <div className="overflow-hidden">
-                            <MenuItemList 
-                              categoryId={category.id} 
+                            <MenuItemList
+                              categoryId={category.id}
                               searchQuery={searchQuery}
                               items={categoryItems[category.id] || []}
-                              onItemsChange={(items) => handleItemsUpdated(category.id, items)}
+                              onItemsChange={(items) =>
+                                handleItemsUpdated(category.id, items)
+                              }
                             />
                           </div>
                         </CardContent>
@@ -387,21 +460,28 @@ export function MenuCategoryList({ categories, setCategories, searchQuery, expan
             open={isCreateItemDialogOpen}
             onOpenChange={setIsCreateItemDialogOpen}
             categoryId={selectedCategory.id}
-            onItemCreated={(newItem) => handleItemCreated(selectedCategory.id, newItem)}
+            onItemCreated={(newItem) =>
+              handleItemCreated(selectedCategory.id, newItem)
+            }
           />
         )}
         {/* Rename Category Dialog */}
-        <Dialog open={isRenameCategoryDialogOpen} onOpenChange={setIsRenameCategoryDialogOpen}>
+        <Dialog
+          open={isRenameCategoryDialogOpen}
+          onOpenChange={setIsRenameCategoryDialogOpen}
+        >
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Edit Category</DialogTitle>
             </DialogHeader>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              if (categoryToRename) {
-                handleRenameCategory(categoryToRename.id);
-              }
-            }}>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (categoryToRename) {
+                  handleRenameCategory(categoryToRename.id);
+                }
+              }}
+            >
               <div className="space-y-4">
                 <div className="grid gap-2">
                   <Label htmlFor="categoryName">Category Name</Label>
@@ -424,12 +504,14 @@ export function MenuCategoryList({ categories, setCategories, searchQuery, expan
                 </div>
               </div>
               <DialogFooter className="mt-4">
-                <Button type="button" variant="outline" onClick={() => setIsRenameCategoryDialogOpen(false)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsRenameCategoryDialogOpen(false)}
+                >
                   Cancel
                 </Button>
-                <Button type="submit">
-                  Save Changes
-                </Button>
+                <Button type="submit">Save Changes</Button>
               </DialogFooter>
             </form>
           </DialogContent>

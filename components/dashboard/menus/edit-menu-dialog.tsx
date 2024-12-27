@@ -150,7 +150,7 @@ export function EditMenuDialog({ open, onOpenChange, menu }: EditMenuDialogProps
               </div>
             )}
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex-row-reverse gap-2">
             <Button
               type="button"
               variant="outline"
@@ -159,7 +159,10 @@ export function EditMenuDialog({ open, onOpenChange, menu }: EditMenuDialogProps
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button 
+              type="submit" 
+              disabled={isLoading}
+            >
               {isLoading ? "Saving..." : "Save Changes"}
             </Button>
           </DialogFooter>

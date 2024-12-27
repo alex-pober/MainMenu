@@ -315,6 +315,13 @@ export function MenuItemList({ categoryId, searchQuery, items, onItemsChange }: 
                           
                           <div className="flex flex-row md:flex-col items-start md:items-end gap-2 w-full md:w-auto">
                             <div className="flex flex-wrap md:flex-nowrap items-center gap-2 w-full md:w-auto justify-between md:justify-end">
+                              <div>
+                                <div className="text-lg font-semibold order-1 md:order-none">{item.price !== null ? `$${item.price.toFixed(2)}` : <></>}</div>
+                                <Badge variant={item.is_available ? "default" : "secondary"} className="order-2 md:order-none">
+                                  {item.is_available ? 'Available' : 'Unavailable'}
+                                </Badge>
+                              </div>
+                              <div className='flex flex-row gap-4'>
                               {Array.isArray(item.image_urls) && item.image_urls.length > 0 && (
                                 <div className="flex gap-2 order-3 md:order-none">
                                   {item.image_urls.map((url) => (
@@ -338,15 +345,10 @@ export function MenuItemList({ categoryId, searchQuery, items, onItemsChange }: 
                               
                                 </div>
                               )}
-                              <div>
-                                <div className="text-lg font-semibold order-1 md:order-none">{item.price !== null ? `$${item.price.toFixed(2)}` : <></>}</div>
-                                <Badge variant={item.is_available ? "default" : "secondary"} className="order-2 md:order-none">
-                                  {item.is_available ? 'Available' : 'Unavailable'}
-                                </Badge>
-                              </div>
+
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="hover:text-primary order-4 md:order-none">
+                                  <Button variant="ghost" size="icon" className=" order-4 md:order-none">
                                     <MoreVertical className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
@@ -368,6 +370,7 @@ export function MenuItemList({ categoryId, searchQuery, items, onItemsChange }: 
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
+                              </div>
                             </div>
                           </div>
                         </div>

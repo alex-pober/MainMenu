@@ -39,9 +39,12 @@ export default function PrintMenu() {
   useEffect(() => {
     const checkMobileDevice = () => {
       const userAgent = navigator.userAgent || navigator.vendor;
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
-      console.log('Device detection - User Agent:', userAgent);
-      console.log('Is Mobile Device:', isMobile);
+      const isMobile =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          userAgent
+        );
+      console.log("Device detection - User Agent:", userAgent);
+      console.log("Is Mobile Device:", isMobile);
       setIsMobileDevice(isMobile);
     };
 
@@ -333,7 +336,7 @@ export default function PrintMenu() {
         <h1 className="text-3xl font-bold">Print Menu Preview</h1>
         <Button
           onClick={() => {
-            window.open(pdfUrl, '_blank', 'noopener,noreferrer');
+            window.open(pdfUrl, "_blank", "noopener,noreferrer");
           }}
         >
           View PDF
@@ -342,15 +345,22 @@ export default function PrintMenu() {
 
       {pdfUrl && (
         <>
-          <div className={`${isMobileDevice ? 'hidden' : 'block'} w-full aspect-[1/1.4142] border border-gray-200 rounded-lg overflow-hidden`}>
+          <div
+            className={`${
+              isMobileDevice ? "hidden" : "block"
+            } w-full aspect-[1/1.4142] border border-gray-200 rounded-lg overflow-hidden`}
+          >
             <iframe
               src={pdfUrl}
               className="w-full h-full"
               title="Menu PDF Preview"
             />
           </div>
-          <div className={isMobileDevice ? 'block' : 'hidden'}>
-            <p className="text-gray-600 mb-4 text-center py-8">PDF preview is not available on mobile devices. Please click the View PDF button above to view your menu.</p>
+          <div className={isMobileDevice ? "block" : "hidden"}>
+            <p className="text-gray-600 mb-4 text-center py-8">
+              PDF preview is not available on mobile devices. Please click the
+              View PDF button above to view your menu.
+            </p>
           </div>
         </>
       )}
