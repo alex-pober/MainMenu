@@ -21,7 +21,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { createBrowserClient } from "@supabase/ssr";
+import { useSupabase } from "@/hooks/use-supabase";
 import { useToast } from "@/hooks/use-toast";
 import type { MenuCategory, MenuItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -68,13 +68,13 @@ export function MenuCategoryList({
   const { toast } = useToast();
 
   // Fetch items for all categories when component mounts or categories change
+  const { client: supabase } = useSupabase();
+
   useEffect(() => {
     const fetchItemsForCategories = async () => {
       try {
-        const supabase = createBrowserClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-        );
+        if (!supabase) return;
+
         const { data, error } = await supabase
           .from("menu_items")
           .select("*")
@@ -111,7 +111,7 @@ export function MenuCategoryList({
     if (categories.length > 0) {
       fetchItemsForCategories();
     }
-  }, [categories]);
+  }, [categories, supabase, toast]);
 
   // Update expanded states when expandedCategories prop changes
   useEffect(() => {
@@ -141,10 +141,7 @@ export function MenuCategoryList({
     setCategories(updatedItems);
 
     try {
-      const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
+      if (!supabase) return;
 
       // Update each category's sort_order in the database
       for (const item of updatedItems) {
@@ -171,10 +168,8 @@ export function MenuCategoryList({
 
   const handleDeleteCategory = async (categoryId: string) => {
     try {
-      const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
+      if (!supabase) return;
+
       const { error } = await supabase
         .from("menu_categories")
         .delete()
@@ -222,10 +217,7 @@ export function MenuCategoryList({
 
     // Fetch fresh data for all categories
     try {
-      const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
+      if (!supabase) return;
       const { data, error } = await supabase
         .from("menu_items")
         .select("*")
@@ -257,10 +249,7 @@ export function MenuCategoryList({
 
   const handleRenameCategory = async (categoryId: string) => {
     try {
-      const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
+      if (!supabase) return;
 
       const { error } = await supabase
         .from("menu_categories")
@@ -419,7 +408,7 @@ export function MenuCategoryList({
                                   </div>
                                 </div>
 
-                             
+
                             </div>
                                 {category.description && (
                                   <p className="text-sm text-muted-foreground">

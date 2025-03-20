@@ -3,22 +3,21 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Breadcrumbs } from '@/components/ui/breadcrumb';
-import { createBrowserClient } from '@supabase/ssr';
+import { useSupabase } from '@/hooks/use-supabase';
 import type { Menu } from '@/lib/types';
 
 export function MenuBreadcrumbs() {
   const params = useParams();
   const [menu, setMenu] = useState<Menu | null>(null);
+  const { client: supabase } = useSupabase();
 
   useEffect(() => {
     const fetchMenu = async () => {
       if (!params.id) return;
 
       try {
-        const supabase = createBrowserClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-        );
+        if (!supabase) return;
+        
         const { data, error } = await supabase
           .from('menus')
           .select('*')
@@ -33,7 +32,7 @@ export function MenuBreadcrumbs() {
     };
 
     fetchMenu();
-  }, [params.id]);
+  }, [params.id, supabase]);
 
   const segments = [
     { title: 'Dashboard', href: '/dashboard' },

@@ -11,7 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { MenuCategoryList } from '@/components/dashboard/menus/menu-category-list';
 import { CreateCategoryDialog } from '@/components/dashboard/menus/create-category-dialog';
 import { getMenuDetails } from '@/lib/services/menu-service';
-import { createBrowserClient } from '@supabase/ssr';
+import { useSupabase } from '@/hooks/use-supabase';
 import type { Menu, MenuCategory } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
@@ -28,6 +28,7 @@ export function MenuDetails() {
   const [isSaving, setIsSaving] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState(false);
   const { toast } = useToast();
+  const { client: supabase } = useSupabase();
   //   if (!menu) return;
 
   //   try {
@@ -68,10 +69,10 @@ export function MenuDetails() {
   useEffect(() => {
     const fetchMenuDetails = async () => {
       if (!params.id) return;
+      if (!supabase) return; // Skip if supabase client is not available yet
 
       try {
         setIsLoading(true);
-        const supabase = await createClient()
         const { menu, categories } = await getMenuDetails(params.id as string, supabase);
         setMenu(menu);
         setCategories(categories);
@@ -88,7 +89,7 @@ export function MenuDetails() {
     };
 
     fetchMenuDetails();
-  }, [params.id, toast]);
+  }, [params.id, toast, supabase]);
 
   if (isLoading) {
     return (

@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { createBrowserClient } from '@supabase/ssr';
+import { useSupabase } from '@/hooks/use-supabase';
 import { useMenus } from '@/lib/context/menu-context';
 import {createClient} from '@/lib/supabase/client';
 import type { CreateMenuInput } from '@/lib/types';
@@ -30,17 +30,16 @@ export function CreateMenuDialog({ open, onOpenChange }: CreateMenuDialogProps) 
   });
   const { toast } = useToast();
   const { addMenu } = useMenus();
+  const { client: supabase } = useSupabase();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const supabase = await createClient();
-      // const supabase = createBrowserClient(
-      //   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      //   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      // );
+      if (!supabase) {
+        throw new Error('Supabase client not available');
+      }
 
       const {
         data: { user },

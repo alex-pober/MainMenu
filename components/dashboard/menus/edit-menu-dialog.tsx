@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { createBrowserClient } from '@supabase/ssr';
+import { useSupabase } from '@/hooks/use-supabase';
 import { useMenus } from '@/lib/context/menu-context';
 import type { Menu } from '@/lib/types';
 
@@ -28,6 +28,7 @@ export function EditMenuDialog({ open, onOpenChange, menu }: EditMenuDialogProps
   });
   const { toast } = useToast();
   const { updateMenu } = useMenus();
+  const { client: supabase } = useSupabase();
 
   useEffect(() => {
     if (menu) {
@@ -46,10 +47,10 @@ export function EditMenuDialog({ open, onOpenChange, menu }: EditMenuDialogProps
     setIsLoading(true);
 
     try {
-      const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
+      if (!supabase) {
+        throw new Error('Supabase client not available');
+      }
+      
       const { data, error } = await supabase
         .from('menus')
         .update({

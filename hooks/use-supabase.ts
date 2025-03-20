@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { createBrowserClient } from '@supabase/ssr'
 import type { SupabaseClient, User } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/client';
 
 interface UseSupabaseOptions {
   requireAuth?: boolean;
@@ -15,40 +15,39 @@ export function useSupabase(options: UseSupabaseOptions = { requireAuth: false }
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      setError('Missing Supabase environment variables');
+    try {
+      const supabase = createClient();
+      setClient(supabase);
+      
+      // Get initial session
+      const initializeAuth = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          setUser(session.user);
+        }
+        setIsLoading(false);
+      };
+
+      initializeAuth();
+
+      // Listen for auth changes
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (_event, session) => {
+          setUser(session?.user ?? null);
+        }
+      );
+
+      return () => {
+        subscription.unsubscribe();
+      };
+      
+    } catch (e) {
+      setError('Failed to initialize Supabase client');
       setIsLoading(false);
       return;
     }
 
-    const supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    );
 
-    setClient(supabase);
-
-    // Get initial session
-    const initializeAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setUser(session.user);
-      }
-      setIsLoading(false);
-    };
-
-    initializeAuth();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setUser(session?.user ?? null);
-      }
-    );
-
-    return () => {
-      subscription.unsubscribe();
-    };
   }, []);
 
   // Check for required auth

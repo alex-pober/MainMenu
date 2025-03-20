@@ -1,7 +1,7 @@
 // @ts-nocheck
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { MoreVertical, GripVertical } from 'lucide-react';
-import { createBrowserClient } from '@supabase/ssr';
+import { useSupabase } from '@/hooks/use-supabase';
 import { useToast } from '@/hooks/use-toast';
 import { deleteImage } from '@/lib/utils/upload';
 import type { MenuItem } from '@/lib/types';
@@ -33,13 +33,12 @@ export function MenuItemList({ categoryId, searchQuery, items, onItemsChange }: 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const { toast } = useToast();
+  const { client: supabase } = useSupabase();
 
-  const fetchItems = async () => {
+  const fetchItems = useCallback(async () => {
     try {
-      const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
+      if (!supabase) return;
+      
       const { data, error } = await supabase
         .from('menu_items')
         .select(`
@@ -76,18 +75,18 @@ export function MenuItemList({ categoryId, searchQuery, items, onItemsChange }: 
         variant: "destructive",
       });
     }
-  };
+  }, [categoryId, supabase, toast, onItemsChange]);
 
+  // We intentionally omit fetchItems from the dependency array to prevent an infinite loop
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchItems();
-  }, [categoryId]);
+  }, [categoryId, supabase]);
 
   const handleToggleAvailability = async (item: MenuItem) => {
     try {
-      const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
+      if (!supabase) return;
+      
       const { data, error } = await supabase
         .from('menu_items')
         .update({ is_available: !item.is_available })
@@ -119,10 +118,8 @@ export function MenuItemList({ categoryId, searchQuery, items, onItemsChange }: 
 
   const handleDeleteItem = async (item: MenuItem) => {
     try {
-      const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
+      if (!supabase) return;
+      
       if (item.image_urls?.length > 0) {
         await Promise.all(item.image_urls.map(url => deleteImage(url)));
       }
@@ -194,10 +191,7 @@ export function MenuItemList({ categoryId, searchQuery, items, onItemsChange }: 
     onItemsChange(updatedItems);
 
     try {
-      const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
+      if (!supabase) return;
 
       // Update all items with new sort_order
       await Promise.all(

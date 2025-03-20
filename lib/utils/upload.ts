@@ -1,13 +1,10 @@
-import { createBrowserClient } from '@supabase/ssr';
+import { createClient } from '@/lib/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
 
 const BUCKET_NAME = 'menu-item-pictures';
 
 const getSupabaseClient = () => {
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  return createClient();
 };
 
 export async function uploadImages(imageFiles: File[]): Promise<string[]> {

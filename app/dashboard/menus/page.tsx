@@ -7,19 +7,17 @@ import { Input } from '@/components/ui/input';
 import { MenuList } from '@/components/dashboard/menus/menu-list';
 import { CreateMenuDialog } from '@/components/dashboard/menus/create-menu-dialog';
 import { Breadcrumbs } from '@/components/ui/breadcrumb';
-import { createBrowserClient } from '@supabase/ssr';
+import { useSupabase } from '@/hooks/use-supabase';
 
 export default function MenusPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
+  const { client: supabase } = useSupabase();
 
   useEffect(() => {
-    const supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
-
+    if (!supabase) return;
+    
     const getUser = async () => {
       const { data: { user }, error } = await supabase.auth.getUser();
       if (error) {
@@ -32,7 +30,7 @@ export default function MenusPage() {
     };
 
     getUser();
-  }, []);
+  }, [supabase]);
 
   return (
     <div className="grid grid-cols-1 ">

@@ -20,7 +20,7 @@ export function HeroSection() {
             transition={{ duration: 0.6 }}
             className="space-y-8"
           >
-            
+
             <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
               The Ultimate{' '}
               <span className="bg-gradient-to-r from-[#FD851C] to-[#FD851C] bg-clip-text text-transparent inline-block">Mobile Menu</span>
@@ -33,12 +33,12 @@ export function HeroSection() {
               <Button size="lg" className="text-lg bg-[#FD851C] hover:bg-[#FD851C]/90 text-white px-8 rounded-full h-12" onClick={() => router.push('/auth')}>
                 Get Started Free
               </Button>
-              <Button size="lg" className="text-lg bg-white hover:bg-orange-50 text-[#FD851C] px-8 rounded-full h-12 border border-[#FD851C]" onClick={() => router.push('/demo')}>
+              <Button size="lg" className="text-lg bg-white hover:bg-orange-50 text-[#FD851C] px-8 rounded-full h-12 border border-[#FD851C]" onClick={() => router.push('/menus/01126589-f355-4cbb-8f36-da9cf90111e9')}>
                 See Demo
               </Button>
             </div>
           </motion.div>
-          
+
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

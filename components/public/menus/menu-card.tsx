@@ -7,7 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MenuCategories } from './menu-categories';
-import { createBrowserClient } from '@supabase/ssr';
+import { useSupabase } from '@/hooks/use-supabase';
 import type { Menu, MenuCategory } from '@/lib/types';
 
 interface MenuCardProps {
@@ -19,6 +19,7 @@ interface MenuCardProps {
 export function MenuCard({ menu, isExpanded, onToggle }: MenuCardProps) {
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const { client: supabase } = useSupabase();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -26,10 +27,7 @@ export function MenuCard({ menu, isExpanded, onToggle }: MenuCardProps) {
 
       try {
         setIsLoading(true);
-        const supabase = createBrowserClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-        );
+        if (!supabase) return;
         const { data, error } = await supabase
           .from('menu_categories')
           .select('*')
@@ -46,7 +44,7 @@ export function MenuCard({ menu, isExpanded, onToggle }: MenuCardProps) {
     };
 
     fetchCategories();
-  }, [menu.id, isExpanded]);
+  }, [menu.id, isExpanded, supabase]);
 
   return (
     <Card className="transition-all duration-200 hover:shadow-md">

@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, X, Loader2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { createBrowserClient } from '@supabase/ssr';
+import { useSupabase } from '@/hooks/use-supabase';
 import { uploadImages } from '@/lib/utils/upload';
 import type { CreateMenuItemInput, MenuItem } from '@/lib/types';
 
@@ -28,6 +28,7 @@ export function CreateItemDialog({
   const [isLoading, setIsLoading] = useState(false);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const { client: supabase } = useSupabase();
   const [formData, setFormData] = useState<Partial<MenuItem>>({
     category_id: categoryId,
     name: '',
@@ -52,10 +53,9 @@ export function CreateItemDialog({
     setIsLoading(true);
 
     try {
-      const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
+      if (!supabase) {
+        throw new Error('Supabase client not available');
+      }
 
       // Get the current highest sort order
       const { data: existingItems } = await supabase
