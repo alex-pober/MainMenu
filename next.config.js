@@ -15,6 +15,15 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/restaurant/30',
+        destination: '/menus/80a7f1f4-f033-4ca8-ab9b-57453bdeacdf',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;
